@@ -17,21 +17,23 @@ const int SIZE_CHANNEL = 20;
 typedef int[0, SIZE_CHANNEL] channels_type [4][4];
 
 // type for generating starting conditions - on each of the positions can be between 20 to 30 percent of people (more would shutdown UPPAAL server)
-typedef int [START_PASSANGER_COUNT*20/100,START_PASSANGER_COUNT*30/100] position_people_start_count_type;
+// typedef int [START_PASSANGER_COUNT*20/100,START_PASSANGER_COUNT*30/100] position_people_start_count_type;
+typedef int [25,25] position_people_start_count_type;
 typedef int [0, START_PASSANGER_COUNT] position_people_count_array_type [4];
 
 //amount of people on positions
 position_people_count_array_type positionPeopleCount;
-
 
 // sums of channels between two places must be lower than 20 - check in method lead
 channels_type channels;
 
 //type for flooded parts
 typedef bool flooded_parts_type [4];
+typedef urgent chan flooded_parts_channel_type [4];
 
 //flags of flooded parts of boat 
-flooded_parts_type floodedParts;</declaration>
+flooded_parts_type floodedParts;
+flooded_parts_channel_type floodedPartsChan;</declaration>
 	<template>
 		<name>Captain</name>
 		<parameter>int &amp;partIndex</parameter>
@@ -126,40 +128,42 @@ bool isNonePeopleAtPosition(){
 		<declaration>clock periodTime;
 clock sunkTime;
 
-void sunkPart(){
-	int i = 0;
-	for( i ; i &lt; 4 ; i++){
-		if(floodedParts[i] == false){
-			floodedParts[i] = true;
-			return;
-		}
-	}
-}
-
 bool isShipSunken(){
-	int i = 0;
-	for( i ; i &lt; 4 ; i++){
+	int i;
+	for( i = 0 ; i &lt; 4 ; i++){
 		if(floodedParts[i] == false){
 			return false;
 		}
 	}
 	return true;
 }</declaration>
-		<location id="id3" x="-2960" y="-16">
+		<location id="id3" x="-2832" y="-224">
+			<name x="-2842" y="-254">SUNK_PART</name>
+		</location>
+		<location id="id4" x="-2960" y="-16">
 			<name x="-3104" y="-64">INITIAL_UPDATE_VARIABLES</name>
 			<committed/>
 		</location>
-		<location id="id4" x="-2712" y="-8">
+		<location id="id5" x="-2712" y="-8">
 			<name x="-2728" y="32">SHIP_SUNKEN</name>
+			<urgent/>
 		</location>
-		<location id="id5" x="-2736" y="-112">
+		<location id="id6" x="-2736" y="-112">
 			<name x="-2744" y="-160">SHIP_FLOATING</name>
 			<label kind="invariant" x="-2712" y="-128">periodTime &lt;= PERIOD_TIME_MAX</label>
 		</location>
-		<init ref="id3"/>
+		<init ref="id4"/>
 		<transition>
 			<source ref="id3"/>
-			<target ref="id5"/>
+			<target ref="id6"/>
+			<label kind="select" x="-2752" y="-256">part : int[0,3]</label>
+			<label kind="guard" x="-2752" y="-240">floodedParts[part] == false</label>
+			<label kind="synchronisation" x="-2752" y="-224">floodedPartsChan[part]!</label>
+			<label kind="assignment" x="-2752" y="-208">floodedParts[part] = true</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id6"/>
 			<label kind="select" x="-3776" y="-208">p1 : position_people_start_count_type,
 p2 : position_people_start_count_type,
 p3 : position_people_start_count_type,
@@ -191,29 +195,28 @@ channels[3][2] = 0,
 channels[3][3] = 0</label>
 		</transition>
 		<transition>
-			<source ref="id4"/>
-			<target ref="id4"/>
+			<source ref="id5"/>
+			<target ref="id5"/>
 			<nail x="-2648" y="24"/>
 			<nail x="-2656" y="-32"/>
 		</transition>
 		<transition>
-			<source ref="id5"/>
-			<target ref="id4"/>
+			<source ref="id6"/>
+			<target ref="id5"/>
 			<label kind="guard" x="-2696" y="-80">isShipSunken()</label>
 		</transition>
 		<transition>
-			<source ref="id5"/>
-			<target ref="id5"/>
-			<label kind="guard" x="-3152" y="-200">!isShipSunken() and periodTime &gt;= PERIOD_TIME_MIN</label>
-			<label kind="assignment" x="-2952" y="-160">sunkPart(),
-periodTime = 0</label>
-			<nail x="-2808" y="-112"/>
-			<nail x="-2784" y="-176"/>
+			<source ref="id6"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-3232" y="-192">!isShipSunken() and periodTime &gt;= PERIOD_TIME_MIN</label>
+			<label kind="assignment" x="-2976" y="-176">periodTime = 0</label>
+			<nail x="-2832" y="-120"/>
+			<nail x="-2864" y="-152"/>
 		</transition>
 	</template>
 	<template>
 		<name>HazardPlayer</name>
-		<parameter>int &amp; partIndex</parameter>
+		<parameter>int &amp; partIndex, urgent chan&amp; sink</parameter>
 		<declaration>clock progress_time;
 
 bool isPartSunken(){
@@ -240,25 +243,25 @@ void managePeople(){
 		//don't send negative amount of people...
 	}
 }</declaration>
-		<location id="id6" x="-208" y="-32">
+		<location id="id7" x="-208" y="-32">
 			<name x="-218" y="-62">Dead</name>
 		</location>
-		<location id="id7" x="0" y="0">
+		<location id="id8" x="0" y="0">
 			<name x="-10" y="-30">Ruling</name>
 		</location>
-		<init ref="id7"/>
+		<init ref="id8"/>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id7"/>
+			<source ref="id8"/>
+			<target ref="id8"/>
 			<label kind="guard" x="64" y="-8">!isPartSunken()</label>
 			<label kind="assignment" x="-104" y="104">managePeople()</label>
 			<nail x="120" y="48"/>
 			<nail x="48" y="112"/>
 		</transition>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id6"/>
-			<label kind="guard" x="-164" y="-46">isPartSunken()</label>
+			<source ref="id8"/>
+			<target ref="id7"/>
+			<label kind="synchronisation" x="-128" y="-48">sink?</label>
 		</transition>
 	</template>
 	<template>
@@ -267,14 +270,14 @@ void managePeople(){
 		<declaration>bool isPartSunken(){
 	return floodedParts[partIndex];
 }</declaration>
-		<location id="id8" x="-112" y="-48">
+		<location id="id9" x="-112" y="-48">
 		</location>
-		<location id="id9" x="0" y="0">
+		<location id="id10" x="0" y="0">
 		</location>
-		<init ref="id9"/>
+		<init ref="id10"/>
 		<transition>
-			<source ref="id9"/>
-			<target ref="id8"/>
+			<source ref="id10"/>
+			<target ref="id9"/>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
@@ -293,10 +296,10 @@ int index_2 = 2;
 
 int index_3 = 3;
 
-position1 = HazardPlayer(index_0);
-position2 = HazardPlayer(index_1);
-position3 = HazardPlayer(index_2);
-position4 = HazardPlayer(index_3);
+position1 = HazardPlayer(index_0, floodedPartsChan[0]);
+position2 = HazardPlayer(index_1, floodedPartsChan[1]);
+position3 = HazardPlayer(index_2, floodedPartsChan[2]);
+position4 = HazardPlayer(index_3, floodedPartsChan[3]);
 ship = Ship();
 
 system ship, position1, position2, position3, position4;</system>
