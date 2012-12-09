@@ -166,8 +166,7 @@ bool isShipSunken(){
 		<transition>
 			<source ref="id3"/>
 			<target ref="id6"/>
-			<label kind="synchronisation" x="-2752" y="-224">floodedPartsChan[getSunkPart()]!</label>
-			<label kind="assignment" x="-2752" y="-208">floodedParts[getSunkPart()] = true</label>
+			<label kind="synchronisation" x="-2792" y="-208">floodedPartsChan[getSunkPart()-1]!</label>
 		</transition>
 		<transition>
 			<source ref="id4"/>
@@ -217,7 +216,8 @@ channels[3][3] = 0</label>
 			<source ref="id6"/>
 			<target ref="id3"/>
 			<label kind="guard" x="-3232" y="-192">!isShipSunken() and periodTime &gt;= PERIOD_TIME_MIN</label>
-			<label kind="assignment" x="-2976" y="-176">periodTime = 0</label>
+			<label kind="assignment" x="-3096" y="-176">periodTime = 0,
+floodedParts[getSunkPart()] = true</label>
 			<nail x="-2832" y="-120"/>
 			<nail x="-2864" y="-152"/>
 		</transition>
@@ -283,15 +283,17 @@ void manageSavePeople(){
 		<transition>
 			<source ref="id9"/>
 			<target ref="id9"/>
-			<label kind="assignment" x="152" y="64">manageSendingPeople()</label>
+			<label kind="guard" x="168" y="40">not isPartSunken()</label>
+			<label kind="assignment" x="168" y="56">manageSendingPeople()</label>
 			<nail x="168" y="48"/>
 			<nail x="112" y="88"/>
 		</transition>
 		<transition>
 			<source ref="id9"/>
 			<target ref="id9"/>
-			<label kind="guard" x="-272" y="40">isArrivingPeople()</label>
-			<label kind="assignment" x="-272" y="56">manageArrivingPeople()</label>
+			<label kind="guard" x="-272" y="64">isArrivingPeople() 
+and not isPartSunken()</label>
+			<label kind="assignment" x="-272" y="96">manageArrivingPeople()</label>
 			<nail x="-104" y="72"/>
 			<nail x="-168" y="24"/>
 		</transition>
@@ -303,8 +305,9 @@ void manageSavePeople(){
 		<transition>
 			<source ref="id9"/>
 			<target ref="id9"/>
-			<label kind="guard" x="-32" y="104">progress_time &gt; 10</label>
-			<label kind="assignment" x="-32" y="120">manageSavePeople(),
+			<label kind="guard" x="-32" y="104">progress_time &gt; 10 
+and not isPartSunken()</label>
+			<label kind="assignment" x="-32" y="136">manageSavePeople(),
 progress_time = 0</label>
 			<nail x="8" y="96"/>
 			<nail x="-64" y="112"/>
