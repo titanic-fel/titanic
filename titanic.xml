@@ -223,8 +223,35 @@ bool isPartSunken(){
 	return floodedParts[partIndex];
 }
 
-void managePeople(){
-	int i;
+bool isArrivingPeople(){
+    int i;
+	for(i = 0; i &lt; 4 ; i++){
+        if (channels[partIndex][i] != 0) return true;
+	}
+    return false;
+}
+
+void manageArrivingPeople(){
+    int i;
+	//people arrived to position
+	for(i = 0; i &lt; 4 ; i++){
+		positionPeopleCount[i] = positionPeopleCount[i] + channels[partIndex][i];
+		channels[partIndex][i] = 0;
+	}
+
+}
+
+void manageSendingPeople(){
+    int i;
+	//send new people
+	for(i = 0; i &lt; 4 ; i++){
+		//channels[partIndex][i] = SIZE_CHANNEL - channels[i][partIndex];
+		//don't send negative amount of people...
+	}
+}
+
+void manageSavePeople(){
+    int i;
 	//save people - let them jump to boat
 	int savedPeople = 10;
 	if(positionPeopleCount[partIndex] &lt; 10){
@@ -232,47 +259,52 @@ void managePeople(){
 	}
 	positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - savedPeople;
 	passangerCountOnBoard = passangerCountOnBoard - savedPeople;
-	//people arrived to position
-	for(i = 0; i &lt; 4 ; i++){
-		positionPeopleCount[i] = positionPeopleCount[i] + channels[partIndex][i];
-		channels[partIndex][i] = 0;
-	}
-	//send new people
-	for(i = 0; i &lt; 4 ; i++){
-		//channels[partIndex][i] = SIZE_CHANNEL - channels[i][partIndex];
-		//don't send negative amount of people...
-	}
 }</declaration>
 		<location id="id7" x="-16" y="-168">
 			<name x="-26" y="-198">Init</name>
 			<committed/>
 		</location>
-		<location id="id8" x="-208" y="-32">
-			<name x="-218" y="-62">Dead</name>
+		<location id="id8" x="-192" y="-104">
+			<name x="-202" y="-134">Dead</name>
 		</location>
 		<location id="id9" x="0" y="0">
 			<name x="8" y="-56">Ruling</name>
-			<label kind="invariant" x="8" y="-40">progress_time &lt; 20</label>
+			<label kind="invariant" x="8" y="-40">progress_time &lt; 20 and not isArrivingPeople()</label>
 		</location>
 		<init ref="id7"/>
 		<transition>
-			<source ref="id7"/>
+			<source ref="id9"/>
 			<target ref="id9"/>
-			<label kind="assignment" x="0" y="-120">progress_time = 0</label>
+			<label kind="assignment" x="152" y="64">manageSendingPeople()</label>
+			<nail x="168" y="48"/>
+			<nail x="112" y="88"/>
 		</transition>
 		<transition>
 			<source ref="id9"/>
 			<target ref="id9"/>
-			<label kind="guard" x="136" y="32">!isPartSunken() &amp;&amp; progress_time &gt; 10</label>
-			<label kind="assignment" x="136" y="48">managePeople(),
+			<label kind="guard" x="-272" y="40">isArrivingPeople()</label>
+			<label kind="assignment" x="-272" y="56">manageArrivingPeople()</label>
+			<nail x="-104" y="72"/>
+			<nail x="-168" y="24"/>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id9"/>
+			<label kind="assignment" x="-8" y="-152">progress_time = 0</label>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-32" y="104">progress_time &gt; 10</label>
+			<label kind="assignment" x="-32" y="120">manageSavePeople(),
 progress_time = 0</label>
-			<nail x="120" y="48"/>
-			<nail x="48" y="112"/>
+			<nail x="8" y="96"/>
+			<nail x="-64" y="112"/>
 		</transition>
 		<transition>
 			<source ref="id9"/>
 			<target ref="id8"/>
-			<label kind="synchronisation" x="-128" y="-48">sink?</label>
+			<label kind="synchronisation" x="-120" y="-88">sink?</label>
 		</transition>
 	</template>
 	<template>
