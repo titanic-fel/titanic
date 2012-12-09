@@ -128,6 +128,8 @@ bool isNonePeopleAtPosition(){
 		<declaration>clock periodTime;
 clock sunkTime;
 
+int sinkingPart;
+
 int getSunkPart(){
     int i;
     for( i = 0 ; i &lt; 4 ; i++){
@@ -135,11 +137,11 @@ int getSunkPart(){
             return i;
         }
     }
-    return -1;
+    return -1; // throws "The successors of this state are not well defined." error if something is wrong
 }
 
 bool isShipSunken(){
-	int i;
+    int i;
 	for( i = 0 ; i &lt; 4 ; i++){
 		if(floodedParts[i] == false){
 			return false;
@@ -166,7 +168,7 @@ bool isShipSunken(){
 		<transition>
 			<source ref="id3"/>
 			<target ref="id6"/>
-			<label kind="synchronisation" x="-2792" y="-208">floodedPartsChan[getSunkPart()-1]!</label>
+			<label kind="synchronisation" x="-2792" y="-208">floodedPartsChan[sinkingPart]!</label>
 		</transition>
 		<transition>
 			<source ref="id4"/>
@@ -216,8 +218,9 @@ channels[3][3] = 0</label>
 			<source ref="id6"/>
 			<target ref="id3"/>
 			<label kind="guard" x="-3232" y="-192">!isShipSunken() and periodTime &gt;= PERIOD_TIME_MIN</label>
-			<label kind="assignment" x="-3096" y="-176">periodTime = 0,
-floodedParts[getSunkPart()] = true</label>
+			<label kind="assignment" x="-3096" y="-176">sinkingPart = getSunkPart(),
+periodTime = 0,
+floodedParts[sinkingPart] = true</label>
 			<nail x="-2832" y="-120"/>
 			<nail x="-2864" y="-152"/>
 		</transition>
@@ -268,29 +271,41 @@ void manageSavePeople(){
 	positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - savedPeople;
 	passangerCountOnBoard = passangerCountOnBoard - savedPeople;
 }</declaration>
-		<location id="id7" x="-16" y="-168">
+		<location id="id7" x="304" y="112">
+			<name x="288" y="56">Sending_people</name>
+			<label kind="invariant" x="288" y="72">progress_time &lt; 8</label>
+		</location>
+		<location id="id8" x="-16" y="-168">
 			<name x="-26" y="-198">Init</name>
 			<committed/>
 		</location>
-		<location id="id8" x="-192" y="-104">
+		<location id="id9" x="-192" y="-104">
 			<name x="-202" y="-134">Dead</name>
 		</location>
-		<location id="id9" x="0" y="0">
+		<location id="id10" x="0" y="0">
 			<name x="8" y="-56">Ruling</name>
 			<label kind="invariant" x="8" y="-40">progress_time &lt; 20 and not isArrivingPeople()</label>
 		</location>
-		<init ref="id7"/>
+		<init ref="id8"/>
 		<transition>
-			<source ref="id9"/>
-			<target ref="id9"/>
-			<label kind="guard" x="168" y="40">not isPartSunken()</label>
-			<label kind="assignment" x="168" y="56">manageSendingPeople()</label>
-			<nail x="168" y="48"/>
-			<nail x="112" y="88"/>
+			<source ref="id7"/>
+			<target ref="id10"/>
+			<label kind="guard" x="136" y="96">progress_time &gt; 5</label>
+			<label kind="assignment" x="136" y="112">manageSendingPeople()</label>
+			<nail x="184" y="120"/>
+			<nail x="40" y="48"/>
 		</transition>
 		<transition>
-			<source ref="id9"/>
-			<target ref="id9"/>
+			<source ref="id10"/>
+			<target ref="id7"/>
+			<label kind="guard" x="144" y="8">progress_time == 0
+and not isPartSunken()</label>
+			<nail x="120" y="8"/>
+			<nail x="208" y="40"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id10"/>
 			<label kind="guard" x="-272" y="64">isArrivingPeople() 
 and not isPartSunken()</label>
 			<label kind="assignment" x="-272" y="96">manageArrivingPeople()</label>
@@ -298,23 +313,22 @@ and not isPartSunken()</label>
 			<nail x="-168" y="24"/>
 		</transition>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id9"/>
+			<source ref="id8"/>
+			<target ref="id10"/>
 			<label kind="assignment" x="-8" y="-152">progress_time = 0</label>
 		</transition>
 		<transition>
-			<source ref="id9"/>
-			<target ref="id9"/>
-			<label kind="guard" x="-32" y="104">progress_time &gt; 10 
-and not isPartSunken()</label>
+			<source ref="id10"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-32" y="112">progress_time &gt; 10</label>
 			<label kind="assignment" x="-32" y="136">manageSavePeople(),
 progress_time = 0</label>
 			<nail x="8" y="96"/>
 			<nail x="-64" y="112"/>
 		</transition>
 		<transition>
-			<source ref="id9"/>
-			<target ref="id8"/>
+			<source ref="id10"/>
+			<target ref="id9"/>
 			<label kind="synchronisation" x="-120" y="-88">sink?</label>
 		</transition>
 	</template>
@@ -324,14 +338,14 @@ progress_time = 0</label>
 		<declaration>bool isPartSunken(){
 	return floodedParts[partIndex];
 }</declaration>
-		<location id="id10" x="-112" y="-48">
+		<location id="id11" x="-112" y="-48">
 		</location>
-		<location id="id11" x="0" y="0">
+		<location id="id12" x="0" y="0">
 		</location>
-		<init ref="id11"/>
+		<init ref="id12"/>
 		<transition>
-			<source ref="id11"/>
-			<target ref="id10"/>
+			<source ref="id12"/>
+			<target ref="id11"/>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
