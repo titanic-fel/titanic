@@ -27,6 +27,9 @@ position_people_count_array_type positionPeopleCount;
 // sums of channels between two places must be lower than 20 - check in method lead
 channels_type channels;
 
+// channel to inform, that people are arriving
+broadcast chan people_arriving;
+
 //type for flooded parts
 typedef bool flooded_parts_type [4];
 typedef urgent chan flooded_parts_channel_type [4];
@@ -255,6 +258,7 @@ void manageArrivingPeople(){
 void manageSendingPeople(){
     int i;
 	//send new people
+    // dont send to channel, which sunk
 	for(i = 0; i &lt; 4 ; i++){
 		//channels[partIndex][i] = SIZE_CHANNEL - channels[i][partIndex];
 		//don't send negative amount of people...
@@ -289,8 +293,19 @@ void manageSavePeople(){
 		<init ref="id8"/>
 		<transition>
 			<source ref="id7"/>
+			<target ref="id7"/>
+			<label kind="guard" x="400" y="136">isArrivingPeople() 
+and not isPartSunken()</label>
+			<label kind="synchronisation" x="400" y="168">people_arriving?</label>
+			<label kind="assignment" x="400" y="184">manageArrivingPeople()</label>
+			<nail x="392" y="120"/>
+			<nail x="376" y="176"/>
+		</transition>
+		<transition>
+			<source ref="id7"/>
 			<target ref="id10"/>
 			<label kind="guard" x="136" y="96">progress_time &gt; 5</label>
+			<label kind="synchronisation" x="136" y="80">people_arriving!</label>
 			<label kind="assignment" x="136" y="112">manageSendingPeople()</label>
 			<nail x="184" y="120"/>
 			<nail x="40" y="48"/>
@@ -308,6 +323,7 @@ and not isPartSunken()</label>
 			<target ref="id10"/>
 			<label kind="guard" x="-272" y="64">isArrivingPeople() 
 and not isPartSunken()</label>
+			<label kind="synchronisation" x="-272" y="48">people_arriving?</label>
 			<label kind="assignment" x="-272" y="96">manageArrivingPeople()</label>
 			<nail x="-104" y="72"/>
 			<nail x="-168" y="24"/>
