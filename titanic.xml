@@ -243,24 +243,35 @@ void managePeople(){
 		//don't send negative amount of people...
 	}
 }</declaration>
-		<location id="id7" x="-208" y="-32">
+		<location id="id7" x="-16" y="-168">
+			<name x="-26" y="-198">Init</name>
+			<committed/>
+		</location>
+		<location id="id8" x="-208" y="-32">
 			<name x="-218" y="-62">Dead</name>
 		</location>
-		<location id="id8" x="0" y="0">
-			<name x="-10" y="-30">Ruling</name>
+		<location id="id9" x="0" y="0">
+			<name x="8" y="-56">Ruling</name>
+			<label kind="invariant" x="8" y="-40">progress_time &lt; 20</label>
 		</location>
-		<init ref="id8"/>
+		<init ref="id7"/>
 		<transition>
-			<source ref="id8"/>
-			<target ref="id8"/>
-			<label kind="guard" x="64" y="-8">!isPartSunken()</label>
-			<label kind="assignment" x="-104" y="104">managePeople()</label>
+			<source ref="id7"/>
+			<target ref="id9"/>
+			<label kind="assignment" x="0" y="-120">progress_time = 0</label>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id9"/>
+			<label kind="guard" x="136" y="32">!isPartSunken() &amp;&amp; progress_time &gt; 10</label>
+			<label kind="assignment" x="136" y="48">managePeople(),
+progress_time = 0</label>
 			<nail x="120" y="48"/>
 			<nail x="48" y="112"/>
 		</transition>
 		<transition>
-			<source ref="id8"/>
-			<target ref="id7"/>
+			<source ref="id9"/>
+			<target ref="id8"/>
 			<label kind="synchronisation" x="-128" y="-48">sink?</label>
 		</transition>
 	</template>
@@ -270,14 +281,14 @@ void managePeople(){
 		<declaration>bool isPartSunken(){
 	return floodedParts[partIndex];
 }</declaration>
-		<location id="id9" x="-112" y="-48">
+		<location id="id10" x="-112" y="-48">
 		</location>
-		<location id="id10" x="0" y="0">
+		<location id="id11" x="0" y="0">
 		</location>
-		<init ref="id10"/>
+		<init ref="id11"/>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id9"/>
+			<source ref="id11"/>
+			<target ref="id10"/>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
