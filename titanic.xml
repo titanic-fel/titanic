@@ -16,10 +16,12 @@ const int SIZE_CHANNEL = 20;
 //type for channels - array with size in interval 0-SIZE_CHANNEL
 typedef int[0, SIZE_CHANNEL] channels_type [4][4];
 
-typedef int [0, START_PASSANGER_COUNT] position_people_count_type [4];
+// type for generating starting conditions - on each of the positions can be between 20 to 30 percent of people (more would shutdown UPPAAL server)
+typedef int [START_PASSANGER_COUNT*20/100,START_PASSANGER_COUNT*30/100] position_people_start_count_type;
+typedef int [0, START_PASSANGER_COUNT] position_people_count_array_type [4];
 
 //amount of people on positions
-position_people_count_type positionPeopleCount;
+position_people_count_array_type positionPeopleCount;
 
 
 // sums of channels between two places must be lower than 20 - check in method lead
@@ -158,10 +160,15 @@ bool isShipSunken(){
 		<transition>
 			<source ref="id3"/>
 			<target ref="id5"/>
-			<label kind="assignment" x="-3776" y="-96">positionPeopleCount[0] = 25,
-positionPeopleCount[1] = 25,
-positionPeopleCount[2] = 25,
-positionPeopleCount[3] = 25,
+			<label kind="select" x="-3776" y="-208">p1 : position_people_start_count_type,
+p2 : position_people_start_count_type,
+p3 : position_people_start_count_type,
+p4 : position_people_start_count_type</label>
+			<label kind="guard" x="-3776" y="-128">p1 + p2 + p3 + p4 == START_PASSANGER_COUNT</label>
+			<label kind="assignment" x="-3776" y="-96">positionPeopleCount[0] = p1,
+positionPeopleCount[1] = p2,
+positionPeopleCount[2] = p3,
+positionPeopleCount[3] = p4,
 floodedParts[0] = false,
 floodedParts[1] = false,
 floodedParts[2] = false,
