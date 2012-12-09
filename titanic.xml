@@ -5,7 +5,8 @@
 
 const int START_PASSANGER_COUNT = 100;
 const int TIME_LIMIT = 100;
-int PERIOD_TIME = 25;
+int PERIOD_TIME_MIN = 25;
+int PERIOD_TIME_MAX = 50;
 
 int passangerCountOnBoard = START_PASSANGER_COUNT;
 
@@ -151,6 +152,7 @@ bool isShipSunken(){
 		</location>
 		<location id="id5" x="-2736" y="-112">
 			<name x="-2744" y="-160">SHIP_FLOATING</name>
+			<label kind="invariant" x="-2712" y="-128">periodTime &lt;= PERIOD_TIME_MAX</label>
 		</location>
 		<init ref="id3"/>
 		<transition>
@@ -195,7 +197,7 @@ channels[3][3] = 0</label>
 		<transition>
 			<source ref="id5"/>
 			<target ref="id5"/>
-			<label kind="guard" x="-3152" y="-200">!isShipSunken() and periodTime &gt;= PERIOD_TIME</label>
+			<label kind="guard" x="-3152" y="-200">!isShipSunken() and periodTime &gt;= PERIOD_TIME_MIN</label>
 			<label kind="assignment" x="-2952" y="-160">sunkPart(),
 periodTime = 0</label>
 			<nail x="-2808" y="-112"/>
