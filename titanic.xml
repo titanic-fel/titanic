@@ -3,9 +3,6 @@
 <nta>
 	<declaration>// Place global declarations here.
 
-clock periodTime;
-clock sunkTime;
-
 const int START_PASSANGER_COUNT = 100;
 const int TIME_LIMIT = 100;
 int PERIOD_TIME = 25;
@@ -34,7 +31,7 @@ typedef bool flooded_parts_type [4];
 flooded_parts_type floodedParts;</declaration>
 	<template>
 		<name>Captain</name>
-		<parameter>int &amp;peopleAmount, int &amp;partIndex</parameter>
+		<parameter>int &amp;partIndex</parameter>
 		<declaration>int getSuccessorIndex(int partIndex){
 	if(partIndex = 3){
 		return 0;
@@ -123,8 +120,10 @@ bool isNonePeopleAtPosition(){
 	</template>
 	<template>
 		<name>Ship</name>
-		<parameter>clock &amp;periodTime, int &amp; PERIOD, position_people_count_type &amp; positionPeopleCount, flooded_parts_type &amp; floodedPartsm, channels_type &amp; channels</parameter>
-		<declaration>void sunkPart(){
+		<declaration>clock periodTime;
+clock sunkTime;
+
+void sunkPart(){
 	int i = 0;
 	for( i ; i &lt; 4 ; i++){
 		if(floodedParts[i] == false){
@@ -196,7 +195,7 @@ channels[3][3] = 0</label>
 		<transition>
 			<source ref="id5"/>
 			<target ref="id5"/>
-			<label kind="guard" x="-3152" y="-200">!isShipSunken() and periodTime &gt;= PERIOD</label>
+			<label kind="guard" x="-3152" y="-200">!isShipSunken() and periodTime &gt;= PERIOD_TIME</label>
 			<label kind="assignment" x="-2952" y="-160">sunkPart(),
 periodTime = 0</label>
 			<nail x="-2808" y="-112"/>
@@ -205,7 +204,7 @@ periodTime = 0</label>
 	</template>
 	<template>
 		<name>HazardPlayer</name>
-		<parameter>int &amp; partIndex, position_people_count_type &amp; positionPeopleCount, int &amp; passangersOnBoard, channels_type &amp; channels, flooded_parts_type &amp; floodedParts</parameter>
+		<parameter>int &amp; partIndex</parameter>
 		<declaration>clock progress_time;
 
 bool isPartSunken(){
@@ -213,22 +212,21 @@ bool isPartSunken(){
 }
 
 void managePeople(){
-	int i = 0;
+	int i;
 	//save people - let them jump to boat
 	int savedPeople = 10;
 	if(positionPeopleCount[partIndex] &lt; 10){
 		savedPeople = positionPeopleCount[partIndex];
 	}
 	positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - savedPeople;
-	passangersOnBoard = passangersOnBoard - savedPeople;
+	passangerCountOnBoard = passangerCountOnBoard - savedPeople;
 	//people arrived to position
-	for(i; i &lt; 4 ; i++){
+	for(i = 0; i &lt; 4 ; i++){
 		positionPeopleCount[i] = positionPeopleCount[i] + channels[partIndex][i];
 		channels[partIndex][i] = 0;
 	}
-	i = 0;
 	//send new people
-	for(i; i &lt; 4 ; i++){
+	for(i = 0; i &lt; 4 ; i++){
 		//channels[partIndex][i] = SIZE_CHANNEL - channels[i][partIndex];
 		//don't send negative amount of people...
 	}
@@ -286,11 +284,11 @@ int index_2 = 2;
 
 int index_3 = 3;
 
-position1 = HazardPlayer(index_0,  positionPeopleCount, passangerCountOnBoard, channels, floodedParts);
-position2 = HazardPlayer(index_1,  positionPeopleCount, passangerCountOnBoard, channels, floodedParts);
-position3 = HazardPlayer(index_2, positionPeopleCount, passangerCountOnBoard, channels, floodedParts);
-position4 = HazardPlayer(index_3, positionPeopleCount, passangerCountOnBoard, channels, floodedParts);
-ship = Ship(periodTime, PERIOD_TIME, positionPeopleCount, floodedParts, channels);
+position1 = HazardPlayer(index_0);
+position2 = HazardPlayer(index_1);
+position3 = HazardPlayer(index_2);
+position4 = HazardPlayer(index_3);
+ship = Ship();
 
 system ship, position1, position2, position3, position4;</system>
 </nta>
