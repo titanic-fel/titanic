@@ -326,14 +326,14 @@ void manageSendingPeople(){
     //sets max val
     int sendPeople = positionPeopleCount[partIndex];;
     //don't send people to empty place, don't send people to flooded place
-    if(floodedParts[LAST_POSITION] || positionPeopleCount[LAST_POSITION] != 0){
+    if(floodedParts[LAST_POSITION] || positionPeopleCount[LAST_POSITION] == 0){
         return;
     }
     //restrict val for channel 
     if(sendPeople + channels[LAST_POSITION][partIndex] &gt; SIZE_CHANNEL){
         sendPeople = SIZE_CHANNEL - channels[LAST_POSITION][partIndex];
     }
-    channels[partIndex][LAST_POSITION] = 10;
+    channels[partIndex][LAST_POSITION] = sendPeople;
 }
 
 void manageSavePeople(){
