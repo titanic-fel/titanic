@@ -1,0 +1,32 @@
+Stavový automat Ship
+-------------------
+
+Tento automat popisuje chování lodi. V časových intervalech v rozmezí (PERIOD_TIME_MIN, PERIOD_TIME_MAX) se vždy potopí jedna z částí lodi. Je dopředu známé, že se potopí část 1, pak část 2, 3 a 4. Po potopení všech částí je potopena celá loď (stav SHIP_SUNKEN).
+
+Stavový automat hráčů
+---------------------
+
+Obecný popis hráče - detaily ke každému z hráčů je v dalších kapitolách. Základní odlišnost v jednotlivých hráčích je v metodě manageSendingPeople, která se stará o přeposílání lidí po částech lodi.
+
+Každý z hráčů prochází základní časovou smyčkou
+* v čase 0 se může rozhodnout a odeslat lidi na jinou část lodi, tito lidé dorazí na místo určení v časovém rozmezí (5, 8), pokud se mezitím nepotopí tato část lodi
+* od času 0 se také připravuje další záchranná loď a nastupují na ní lidé. Tato loď odplouvá někdy v časovém rozmezí (10, 20) a pak znovu začíná časová smyčka.
+
+Hráč je posledním člověkem na místě. Pokud nezbývá na této části lodi žádný hráč, pak byl zachráněn.
+
+Stavový automat Captain
+-----------------------
+
+Tento stavový automat hráče je rozšířen o možnost identifikace záchrany kapitána. Pokud je kapitán poslendím na místě, přejde automat do stavu Captain_saved.
+
+ -- Popis metody manageSendingPeople
+ 
+Stavový automat Priest
+----------------------       
+ 
+ -- Popis metody manageSendingPeople
+
+Stavový automat HazardPlayer
+----------------------------
+
+ -- Popis metody manageSendingPeople
