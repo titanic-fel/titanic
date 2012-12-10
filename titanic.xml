@@ -275,58 +275,65 @@ void manageSavePeople(){
 	positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - savedPeople;
 	passangerCountOnBoard = passangerCountOnBoard - savedPeople;
 }</declaration>
-		<location id="id7" x="304" y="112">
-			<name x="288" y="56">Sending_people</name>
-			<label kind="invariant" x="288" y="72">progress_time &lt; 8</label>
+		<location id="id7" x="416" y="24">
+			<name x="400" y="-32">Sending_people</name>
+			<label kind="invariant" x="400" y="-16">progress_time &lt; 8</label>
 		</location>
 		<location id="id8" x="-16" y="-168">
 			<name x="-26" y="-198">Init</name>
 			<committed/>
 		</location>
-		<location id="id9" x="-192" y="-104">
-			<name x="-202" y="-134">Dead</name>
+		<location id="id9" x="216" y="248">
+			<name x="206" y="218">Dead</name>
 		</location>
 		<location id="id10" x="0" y="0">
-			<name x="8" y="-56">Ruling</name>
-			<label kind="invariant" x="8" y="-40">progress_time &lt; 20 and not isArrivingPeople()</label>
+			<name x="-88" y="-72">Ruling</name>
+			<label kind="invariant" x="-88" y="-56">progress_time &lt; 20
+and not isArrivingPeople()</label>
 		</location>
 		<init ref="id8"/>
 		<transition>
 			<source ref="id7"/>
+			<target ref="id9"/>
+			<label kind="synchronisation" x="224" y="176">sink?</label>
+		</transition>
+		<transition>
+			<source ref="id7"/>
 			<target ref="id7"/>
-			<label kind="guard" x="400" y="136">isArrivingPeople() 
+			<label kind="guard" x="560" y="8">isArrivingPeople() 
 and not isPartSunken()</label>
-			<label kind="synchronisation" x="400" y="168">people_arriving?</label>
-			<label kind="assignment" x="400" y="184">manageArrivingPeople()</label>
-			<nail x="392" y="120"/>
-			<nail x="376" y="176"/>
+			<label kind="synchronisation" x="560" y="40">people_arriving?</label>
+			<label kind="assignment" x="560" y="56">manageArrivingPeople()</label>
+			<nail x="552" y="8"/>
+			<nail x="552" y="96"/>
 		</transition>
 		<transition>
 			<source ref="id7"/>
 			<target ref="id10"/>
-			<label kind="guard" x="136" y="96">progress_time &gt; 5</label>
-			<label kind="synchronisation" x="136" y="80">people_arriving!</label>
-			<label kind="assignment" x="136" y="112">manageSendingPeople()</label>
-			<nail x="184" y="120"/>
-			<nail x="40" y="48"/>
+			<label kind="guard" x="128" y="40">progress_time &gt; 5
+and not isPartSunken()</label>
+			<label kind="synchronisation" x="128" y="24">people_arriving!</label>
+			<label kind="assignment" x="128" y="72">manageSendingPeople()</label>
+			<nail x="248" y="56"/>
+			<nail x="112" y="56"/>
 		</transition>
 		<transition>
 			<source ref="id10"/>
 			<target ref="id7"/>
-			<label kind="guard" x="144" y="8">progress_time == 0
+			<label kind="guard" x="168" y="-56">progress_time == 0
 and not isPartSunken()</label>
-			<nail x="120" y="8"/>
-			<nail x="208" y="40"/>
+			<nail x="120" y="-16"/>
+			<nail x="248" y="-16"/>
 		</transition>
 		<transition>
 			<source ref="id10"/>
 			<target ref="id10"/>
-			<label kind="guard" x="-272" y="64">isArrivingPeople() 
+			<label kind="guard" x="-336" y="8">isArrivingPeople() 
 and not isPartSunken()</label>
-			<label kind="synchronisation" x="-272" y="48">people_arriving?</label>
-			<label kind="assignment" x="-272" y="96">manageArrivingPeople()</label>
-			<nail x="-104" y="72"/>
-			<nail x="-168" y="24"/>
+			<label kind="synchronisation" x="-336" y="-16">people_arriving?</label>
+			<label kind="assignment" x="-336" y="48">manageArrivingPeople()</label>
+			<nail x="-168" y="48"/>
+			<nail x="-168" y="0"/>
 		</transition>
 		<transition>
 			<source ref="id8"/>
@@ -336,16 +343,17 @@ and not isPartSunken()</label>
 		<transition>
 			<source ref="id10"/>
 			<target ref="id10"/>
-			<label kind="guard" x="-32" y="112">progress_time &gt; 10</label>
-			<label kind="assignment" x="-32" y="136">manageSavePeople(),
+			<label kind="guard" x="-80" y="120">progress_time &gt; 10
+and not isPartSunken()</label>
+			<label kind="assignment" x="-80" y="152">manageSavePeople(),
 progress_time = 0</label>
-			<nail x="8" y="96"/>
+			<nail x="32" y="112"/>
 			<nail x="-64" y="112"/>
 		</transition>
 		<transition>
 			<source ref="id10"/>
 			<target ref="id9"/>
-			<label kind="synchronisation" x="-120" y="-88">sink?</label>
+			<label kind="synchronisation" x="168" y="176">sink?</label>
 		</transition>
 	</template>
 	<template>
