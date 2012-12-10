@@ -84,31 +84,49 @@ void manageSavePeople(){
 	positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - savedPeople;
 	passangerCountOnBoard = passangerCountOnBoard - savedPeople;
 }</declaration>
-		<location id="id7" x="416" y="24">
+		<location id="id0" x="-216" y="360">
+			<name x="-312" y="328">Captain_saved</name>
+		</location>
+		<location id="id1" x="-112" y="232">
+			<urgent/>
+		</location>
+		<location id="id2" x="416" y="24">
 			<name x="400" y="-32">Sending_people</name>
 			<label kind="invariant" x="400" y="-16">progress_time &lt; 8</label>
 		</location>
-		<location id="id8" x="-16" y="-168">
+		<location id="id3" x="-16" y="-168">
 			<name x="-26" y="-198">Init</name>
 			<committed/>
 		</location>
-		<location id="id9" x="216" y="248">
+		<location id="id4" x="216" y="248">
 			<name x="206" y="218">Dead</name>
 		</location>
-		<location id="id10" x="0" y="0">
+		<location id="id5" x="0" y="0">
 			<name x="-88" y="-72">Ruling</name>
 			<label kind="invariant" x="-88" y="-56">progress_time &lt; 20
 and not isArrivingPeople()</label>
 		</location>
-		<init ref="id8"/>
+		<init ref="id3"/>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id9"/>
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="assignment" x="-224" y="272">manageSavePeople()</label>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-232" y="96">positionPeopleCount[partIndex] &gt; 9</label>
+			<label kind="assignment" x="-232" y="120">manageSavePeople(),
+progress_time = 0</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id4"/>
 			<label kind="synchronisation" x="224" y="176">sink?</label>
 		</transition>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id7"/>
+			<source ref="id2"/>
+			<target ref="id2"/>
 			<label kind="guard" x="560" y="8">isArrivingPeople() 
 and not isPartSunken()</label>
 			<label kind="synchronisation" x="560" y="40">people_arriving?</label>
@@ -117,8 +135,8 @@ and not isPartSunken()</label>
 			<nail x="552" y="96"/>
 		</transition>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id10"/>
+			<source ref="id2"/>
+			<target ref="id5"/>
 			<label kind="guard" x="128" y="40">progress_time &gt; 5
 and not isPartSunken()</label>
 			<label kind="synchronisation" x="128" y="24">people_arriving!</label>
@@ -127,16 +145,16 @@ and not isPartSunken()</label>
 			<nail x="112" y="56"/>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id7"/>
+			<source ref="id5"/>
+			<target ref="id2"/>
 			<label kind="guard" x="168" y="-56">progress_time == 0
 and not isPartSunken()</label>
 			<nail x="120" y="-16"/>
 			<nail x="248" y="-16"/>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id10"/>
+			<source ref="id5"/>
+			<target ref="id5"/>
 			<label kind="guard" x="-336" y="8">isArrivingPeople() 
 and not isPartSunken()</label>
 			<label kind="synchronisation" x="-336" y="-16">people_arriving?</label>
@@ -145,23 +163,21 @@ and not isPartSunken()</label>
 			<nail x="-168" y="0"/>
 		</transition>
 		<transition>
-			<source ref="id8"/>
-			<target ref="id10"/>
+			<source ref="id3"/>
+			<target ref="id5"/>
 			<label kind="assignment" x="-8" y="-152">progress_time = 0</label>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id10"/>
-			<label kind="guard" x="-80" y="120">progress_time &gt; 10
+			<source ref="id5"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-40" y="152">progress_time &gt; 10
 and not isPartSunken()</label>
-			<label kind="assignment" x="-80" y="152">manageSavePeople(),
-progress_time = 0</label>
-			<nail x="32" y="112"/>
-			<nail x="-64" y="112"/>
+			<nail x="40" y="96"/>
+			<nail x="-8" y="192"/>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id9"/>
+			<source ref="id5"/>
+			<target ref="id4"/>
 			<label kind="synchronisation" x="168" y="176">sink?</label>
 		</transition>
 	</template>
@@ -191,30 +207,30 @@ bool isShipSunken(){
 	}
 	return true;
 }</declaration>
-		<location id="id3" x="-2832" y="-224">
+		<location id="id6" x="-2832" y="-224">
 			<name x="-2842" y="-254">SUNK_PART</name>
 		</location>
-		<location id="id4" x="-2960" y="-16">
+		<location id="id7" x="-2960" y="-16">
 			<name x="-3104" y="-64">INITIAL_UPDATE_VARIABLES</name>
 			<committed/>
 		</location>
-		<location id="id5" x="-2712" y="-8">
+		<location id="id8" x="-2712" y="-8">
 			<name x="-2728" y="32">SHIP_SUNKEN</name>
 			<urgent/>
 		</location>
-		<location id="id6" x="-2736" y="-112">
+		<location id="id9" x="-2736" y="-112">
 			<name x="-2744" y="-160">SHIP_FLOATING</name>
 			<label kind="invariant" x="-2712" y="-128">periodTime &lt;= PERIOD_TIME_MAX</label>
 		</location>
-		<init ref="id4"/>
+		<init ref="id7"/>
 		<transition>
-			<source ref="id3"/>
-			<target ref="id6"/>
+			<source ref="id6"/>
+			<target ref="id9"/>
 			<label kind="synchronisation" x="-2792" y="-208">floodedPartsChan[sinkingPart]!</label>
 		</transition>
 		<transition>
-			<source ref="id4"/>
-			<target ref="id6"/>
+			<source ref="id7"/>
+			<target ref="id9"/>
 			<label kind="select" x="-3776" y="-208">p1 : position_people_start_count_type,
 p2 : position_people_start_count_type,
 p3 : position_people_start_count_type,
@@ -246,19 +262,19 @@ channels[3][2] = 0,
 channels[3][3] = 0</label>
 		</transition>
 		<transition>
-			<source ref="id5"/>
-			<target ref="id5"/>
+			<source ref="id8"/>
+			<target ref="id8"/>
 			<nail x="-2648" y="24"/>
 			<nail x="-2656" y="-32"/>
 		</transition>
 		<transition>
-			<source ref="id6"/>
-			<target ref="id5"/>
+			<source ref="id9"/>
+			<target ref="id8"/>
 			<label kind="guard" x="-2696" y="-80">isShipSunken()</label>
 		</transition>
 		<transition>
-			<source ref="id6"/>
-			<target ref="id3"/>
+			<source ref="id9"/>
+			<target ref="id6"/>
 			<label kind="guard" x="-3232" y="-192">!isShipSunken() and periodTime &gt;= PERIOD_TIME_MIN</label>
 			<label kind="assignment" x="-3096" y="-176">sinkingPart = getSunkPart(),
 periodTime = 0,
@@ -314,31 +330,31 @@ void manageSavePeople(){
 	positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - savedPeople;
 	passangerCountOnBoard = passangerCountOnBoard - savedPeople;
 }</declaration>
-		<location id="id7" x="416" y="24">
+		<location id="id10" x="416" y="24">
 			<name x="400" y="-32">Sending_people</name>
 			<label kind="invariant" x="400" y="-16">progress_time &lt; 8</label>
 		</location>
-		<location id="id8" x="-16" y="-168">
+		<location id="id11" x="-16" y="-168">
 			<name x="-26" y="-198">Init</name>
 			<committed/>
 		</location>
-		<location id="id9" x="216" y="248">
+		<location id="id12" x="216" y="248">
 			<name x="206" y="218">Dead</name>
 		</location>
-		<location id="id10" x="0" y="0">
+		<location id="id13" x="0" y="0">
 			<name x="-88" y="-72">Ruling</name>
 			<label kind="invariant" x="-88" y="-56">progress_time &lt; 20
 and not isArrivingPeople()</label>
 		</location>
-		<init ref="id8"/>
+		<init ref="id11"/>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id9"/>
+			<source ref="id10"/>
+			<target ref="id12"/>
 			<label kind="synchronisation" x="224" y="176">sink?</label>
 		</transition>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id7"/>
+			<source ref="id10"/>
+			<target ref="id10"/>
 			<label kind="guard" x="560" y="8">isArrivingPeople() 
 and not isPartSunken()</label>
 			<label kind="synchronisation" x="560" y="40">people_arriving?</label>
@@ -347,8 +363,8 @@ and not isPartSunken()</label>
 			<nail x="552" y="96"/>
 		</transition>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id10"/>
+			<source ref="id10"/>
+			<target ref="id13"/>
 			<label kind="guard" x="128" y="40">progress_time &gt; 5
 and not isPartSunken()</label>
 			<label kind="synchronisation" x="128" y="24">people_arriving!</label>
@@ -357,16 +373,16 @@ and not isPartSunken()</label>
 			<nail x="112" y="56"/>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id7"/>
+			<source ref="id13"/>
+			<target ref="id10"/>
 			<label kind="guard" x="168" y="-56">progress_time == 0
 and not isPartSunken()</label>
 			<nail x="120" y="-16"/>
 			<nail x="248" y="-16"/>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id10"/>
+			<source ref="id13"/>
+			<target ref="id13"/>
 			<label kind="guard" x="-336" y="8">isArrivingPeople() 
 and not isPartSunken()</label>
 			<label kind="synchronisation" x="-336" y="-16">people_arriving?</label>
@@ -375,13 +391,13 @@ and not isPartSunken()</label>
 			<nail x="-168" y="0"/>
 		</transition>
 		<transition>
-			<source ref="id8"/>
-			<target ref="id10"/>
+			<source ref="id11"/>
+			<target ref="id13"/>
 			<label kind="assignment" x="-8" y="-152">progress_time = 0</label>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id10"/>
+			<source ref="id13"/>
+			<target ref="id13"/>
 			<label kind="guard" x="-80" y="120">progress_time &gt; 10
 and not isPartSunken()</label>
 			<label kind="assignment" x="-80" y="152">manageSavePeople(),
@@ -390,14 +406,14 @@ progress_time = 0</label>
 			<nail x="-64" y="112"/>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id9"/>
+			<source ref="id13"/>
+			<target ref="id12"/>
 			<label kind="synchronisation" x="168" y="176">sink?</label>
 		</transition>
 	</template>
 	<template>
-		<name>Priest</name>		
-    <parameter>int &amp; partIndex, urgent chan&amp; sink</parameter>
+		<name>Priest</name>
+		<parameter>int &amp; partIndex, urgent chan&amp; sink</parameter>
 		<declaration>clock progress_time;
 
 bool isPartSunken(){
@@ -442,31 +458,31 @@ void manageSavePeople(){
 	positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - savedPeople;
 	passangerCountOnBoard = passangerCountOnBoard - savedPeople;
 }</declaration>
-		<location id="id7" x="416" y="24">
+		<location id="id14" x="416" y="24">
 			<name x="400" y="-32">Sending_people</name>
 			<label kind="invariant" x="400" y="-16">progress_time &lt; 8</label>
 		</location>
-		<location id="id8" x="-16" y="-168">
+		<location id="id15" x="-16" y="-168">
 			<name x="-26" y="-198">Init</name>
 			<committed/>
 		</location>
-		<location id="id9" x="216" y="248">
+		<location id="id16" x="216" y="248">
 			<name x="206" y="218">Dead</name>
 		</location>
-		<location id="id10" x="0" y="0">
+		<location id="id17" x="0" y="0">
 			<name x="-88" y="-72">Ruling</name>
 			<label kind="invariant" x="-88" y="-56">progress_time &lt; 20
 and not isArrivingPeople()</label>
 		</location>
-		<init ref="id8"/>
+		<init ref="id15"/>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id9"/>
+			<source ref="id14"/>
+			<target ref="id16"/>
 			<label kind="synchronisation" x="224" y="176">sink?</label>
 		</transition>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id7"/>
+			<source ref="id14"/>
+			<target ref="id14"/>
 			<label kind="guard" x="560" y="8">isArrivingPeople() 
 and not isPartSunken()</label>
 			<label kind="synchronisation" x="560" y="40">people_arriving?</label>
@@ -475,8 +491,8 @@ and not isPartSunken()</label>
 			<nail x="552" y="96"/>
 		</transition>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id10"/>
+			<source ref="id14"/>
+			<target ref="id17"/>
 			<label kind="guard" x="128" y="40">progress_time &gt; 5
 and not isPartSunken()</label>
 			<label kind="synchronisation" x="128" y="24">people_arriving!</label>
@@ -485,16 +501,16 @@ and not isPartSunken()</label>
 			<nail x="112" y="56"/>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id7"/>
+			<source ref="id17"/>
+			<target ref="id14"/>
 			<label kind="guard" x="168" y="-56">progress_time == 0
 and not isPartSunken()</label>
 			<nail x="120" y="-16"/>
 			<nail x="248" y="-16"/>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id10"/>
+			<source ref="id17"/>
+			<target ref="id17"/>
 			<label kind="guard" x="-336" y="8">isArrivingPeople() 
 and not isPartSunken()</label>
 			<label kind="synchronisation" x="-336" y="-16">people_arriving?</label>
@@ -503,13 +519,13 @@ and not isPartSunken()</label>
 			<nail x="-168" y="0"/>
 		</transition>
 		<transition>
-			<source ref="id8"/>
-			<target ref="id10"/>
+			<source ref="id15"/>
+			<target ref="id17"/>
 			<label kind="assignment" x="-8" y="-152">progress_time = 0</label>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id10"/>
+			<source ref="id17"/>
+			<target ref="id17"/>
 			<label kind="guard" x="-80" y="120">progress_time &gt; 10
 and not isPartSunken()</label>
 			<label kind="assignment" x="-80" y="152">manageSavePeople(),
@@ -518,8 +534,8 @@ progress_time = 0</label>
 			<nail x="-64" y="112"/>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id9"/>
+			<source ref="id17"/>
+			<target ref="id16"/>
 			<label kind="synchronisation" x="168" y="176">sink?</label>
 		</transition>
 	</template>
