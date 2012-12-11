@@ -1,0 +1,34 @@
+Stavový automat Ship
+-------------------
+
+Tento automat popisuje chování lodi. V časových intervalech v rozmezí (PERIOD_TIME_MIN, PERIOD_TIME_MAX) se vždy potopí jedna z částí lodi. Je dopředu známé, že se potopí část 1, pak část 2, 3 a 4. Po potopení všech částí je potopena celá loď (stav SHIP_SUNKEN). Pořadí potápění je určené - simulujeme tím, že loď například narazila do ledovce na pravoboku vepředu, kde se vytvořila díra, tudíž pravobok se potopí jako první, potom levobok, střední část a nakonec záď.
+
+Stavový automat hráčů
+---------------------
+
+Obecný popis hráče - detaily ke každému z hráčů jsou v dalších kapitolách. Základní odlišnost v jednotlivých hráčích je v metodě manageSendingPeople, která se stará o přeposílání lidí po částech lodi.
+
+Každý z hráčů prochází základní časovou smyčkou
+* v čase 0 se může rozhodnout a odeslat lidi na jinou část lodi, tito lidé dorazí na místo určení v časovém rozmezí (5, 8), pokud se mezitím nepotopí tato část lodi
+* od času 0 se také připravuje další záchranná loď a nastupují na ní lidé. Tato loď odplouvá někdy v časovém rozmezí (10, 20) a pak znovu začíná časová smyčka.
+
+Hráč je posledním člověkem na místě. Pokud nezbývá na této části lodi žádný hráč, pak byl zachráněn - v nynější implementaci se může zachránit jen Kapitán.
+
+Žádný automat neposílá lidi na zaplavenou nebo opuštěnou pozici
+
+Stavový automat Captain
+-----------------------
+
+Tento stavový automat hráče je rozšířen o možnost identifikace záchrany kapitána. Pokud je kapitán poslendím na místě, přejde automat do stavu FLOODED_POSITION_AND_CAPTAIN_SAVED. Ostatní automaty sice obsahují také tuto pozici, ale mají ji izolovanou - nelze se do ní dostat. 
+
+Kapitán posílá lidi na jednu nebo obě sousední pozice (kapitánův partIndex +1 a kapitánův partIndex -1). Kapitán se jako jediný rozhoduje o poslání lidí na danou na základě počtu lidí na této pozici - pokud je na pozici, kam chce poslat méně lidí, odešle na ní polovinu z maximálního transportovatelného počtu osob.
+ 
+Stavový automat Priest
+----------------------       
+Původně měl být Priest implementován tak, že odesílá třetinu z maximálního transportovatelného počtu osob na všechny zbylé pozice. Nastal problém, co s čísly nedělitelnými 3. Proto Priest posílá třetinu z max, pokud je na jeho pozici dost lidí. Pokud nemá na pozici dost lidí a je na pozici 4, pošle na neopuštěné, nezaplavené pozice 1, 2, 3 menší celou část z třetiny. Pokud nemá dost lidí a Priest není na pozici 4, tak Priest všechny lidi, které neposlal na pozice 1,2 nebo 3 pošle na pozici 4 (spadají sem i případy, kdy Priest nemůže poslat lidi na pozice). 
+
+Stavový automat HazardPlayer
+----------------------------
+Strategie HazardPlayera je prostá - pozice 4 se zaplaví jako poslední, proto HazardPlayer posílá maximální transportovatelný počet osob jen do pozice 4.
+
+  
