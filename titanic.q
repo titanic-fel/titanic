@@ -4,3 +4,13 @@
 The system is deadlock-free.
 */
 A[] not deadlock
+
+/*
+
+*/
+A<> ship.SHIP_SUNKEN
+
+/*
+
+*/
+E<> ship.SHIP_SUNKEN && peopleCountAtStart - peopleCountOnBoard <= 3*peopleCountAtStart/4

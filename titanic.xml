@@ -3,24 +3,29 @@
 <nta>
 	<declaration>// Place global declarations here.
 
-const int START_PASSANGER_COUNT = 100;
 const int TIME_LIMIT = 100;
+//count of used positions
 const int POSITION_COUNT = 4;
+//amount of positions priest can divide people to
+const int MAX_SEND_PLACES_COUNT = POSITION_COUNT - 1;
+//derived index of last position
 const int LAST_POSITION = POSITION_COUNT - 1;
+//amount of saved people each turn
 const int SAVED_AMOUNT = 10;
+//restriction of maximal val on positions
+const int POSITION_PEOPLE_AMOUNT_RESTRICTION = 10000;
 int PERIOD_TIME_MIN = 25;
 int PERIOD_TIME_MAX = 50;
 
-int passangerCountOnBoard = START_PASSANGER_COUNT;
+int peopleCountOnBoard = 0;
+int peopleCountAtStart = 0;
 
 // the size of channel between 2 places on board 
-const int SIZE_CHANNEL = 20;
+//const int SIZE_CHANNEL = 20;
 const int MAX_SEND_PEOPLE_AMOUNT = 30;
 
 // type for generating starting conditions - on each of the positions can be between 20 to 30 percent of people (more would shutdown UPPAAL server)
-// typedef int [START_PASSANGER_COUNT*20/100,START_PASSANGER_COUNT*30/100] position_people_start_count_type;
-typedef int [25,25] position_people_start_count_type;
-typedef int [0, START_PASSANGER_COUNT] position_people_count_array_type [POSITION_COUNT];
+typedef int [0, POSITION_PEOPLE_AMOUNT_RESTRICTION] position_people_count_array_type [POSITION_COUNT];
 
 //amount of people on positions
 position_people_count_array_type positionPeopleCount;
@@ -41,65 +46,98 @@ bool isPartSunken(){
 	return floodedParts[partIndex];
 }
 
-void manageSendingPeople(){
-    int i;
-	//send new people
-    // dont send to channel, which sunk
-	for(i = 0; i &lt; 4 ; i++){
-		//channels[partIndex][i] = SIZE_CHANNEL - channels[i][partIndex];
-		//don't send negative amount of people...
-	}
+int getSuccessor(){
+    return (partIndex + 1) % POSITION_COUNT;
 }
+
+int getPrecedessor(){
+    return (partIndex + POSITION_COUNT - 1) % POSITION_COUNT;
+}
+
+void sendHalfToPosition(int position, int peopleAmount){
+    int sendPeople;
+    // don't send to flooded parts, don't send to empty places
+    if(floodedParts[position] || positionPeopleCount[position] == 0){
+        return;
+    }
+    //don't send to positions with less people
+    if(positionPeopleCount[position] &gt;= positionPeopleCount[partIndex]){
+        return;
+    }
+    sendPeople = peopleAmount;
+    //captain should not leave position in sending people
+    if(positionPeopleCount[partIndex] == sendPeople){
+        sendPeople = sendPeople - 1;
+    }
+    positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - sendPeople;
+    positionPeopleCount[position] = positionPeopleCount[position] + sendPeople;    
+}
+
+void manageSendingPeople(){
+    int sendPeople;
+    if(positionPeopleCount[partIndex] &gt;= MAX_SEND_PEOPLE_AMOUNT){
+         sendPeople = MAX_SEND_PEOPLE_AMOUNT/2;
+    } else{
+        sendPeople = positionPeopleCount[partIndex]/2;
+    }
+    //halfs can be send - odd amount are well defined thanks to captain condition
+    sendHalfToPosition(getSuccessor(), sendPeople);
+    sendHalfToPosition(getPrecedessor(), sendPeople);
+}
+
 
 void manageSavePeople(){
     int i;
 	//save people - let them jump to boat
 	int savedPeople = 10;
+    //captain can leave position in SAVING moment
 	if(positionPeopleCount[partIndex] &lt; 10){
 		savedPeople = positionPeopleCount[partIndex];
 	}
 	positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - savedPeople;
-	passangerCountOnBoard = passangerCountOnBoard - savedPeople;
+	peopleCountOnBoard = peopleCountOnBoard - savedPeople;
 }</declaration>
 		<location id="id0" x="-120" y="352">
-			<name x="-130" y="322">DEAD_AND_CAPTAIN_SAVED</name>
+			<name x="-130" y="322">FLOODED_POSITION_AND_CAPTAIN_SAVED</name>
 		</location>
 		<location id="id1" x="-200" y="320">
-			<name x="-296" y="288">Captain_saved</name>
+			<name x="-296" y="288">CAPTAIN_SAVED</name>
 		</location>
 		<location id="id2" x="-112" y="232">
+			<name x="-232" y="200">SAVING_PEOPLE</name>
 			<urgent/>
 		</location>
 		<location id="id3" x="416" y="24">
-			<name x="400" y="-32">Sending_people</name>
+			<name x="400" y="-32">SENDING_PEOPLE</name>
 			<label kind="invariant" x="400" y="-16">progress_time &lt; 8</label>
 		</location>
 		<location id="id4" x="-16" y="-168">
-			<name x="-26" y="-198">Init</name>
+			<name x="-26" y="-198">INIT</name>
 			<committed/>
 		</location>
 		<location id="id5" x="216" y="248">
-			<name x="206" y="218">Dead</name>
+			<name x="232" y="240">DEAD</name>
 		</location>
 		<location id="id6" x="0" y="0">
-			<name x="-88" y="-72">Ruling</name>
-			<label kind="invariant" x="-88" y="-56">progress_time &lt; 20</label>
+			<name x="-112" y="-88">RULING</name>
+			<label kind="invariant" x="-168" y="-72">progress_time &lt; 20</label>
 		</location>
 		<init ref="id4"/>
 		<transition>
 			<source ref="id1"/>
 			<target ref="id0"/>
-			<label kind="synchronisation" x="-220" y="321">sink?</label>
+			<label kind="synchronisation" x="-200" y="344">sink?</label>
 		</transition>
 		<transition>
 			<source ref="id2"/>
 			<target ref="id1"/>
-			<label kind="assignment" x="-152" y="272">manageSavePeople()</label>
+			<label kind="guard" x="-504" y="232">positionPeopleCount[partIndex] &lt;= SAVED_AMOUNT</label>
+			<label kind="assignment" x="-448" y="248">positionPeopleCount[partIndex] = 0</label>
 		</transition>
 		<transition>
 			<source ref="id2"/>
 			<target ref="id6"/>
-			<label kind="guard" x="-232" y="96">positionPeopleCount[partIndex] &gt; 9</label>
+			<label kind="guard" x="-320" y="88">positionPeopleCount[partIndex] &gt; 9</label>
 			<label kind="assignment" x="-232" y="120">manageSavePeople(),
 progress_time = 0</label>
 		</transition>
@@ -111,11 +149,11 @@ progress_time = 0</label>
 		<transition>
 			<source ref="id3"/>
 			<target ref="id6"/>
-			<label kind="guard" x="128" y="40">progress_time &gt; 5
+			<label kind="guard" x="136" y="56">progress_time &gt; 5
 and not isPartSunken()</label>
-			<label kind="assignment" x="128" y="72">manageSendingPeople()</label>
-			<nail x="248" y="56"/>
-			<nail x="112" y="56"/>
+			<label kind="assignment" x="136" y="88">manageSendingPeople()</label>
+			<nail x="256" y="56"/>
+			<nail x="120" y="56"/>
 		</transition>
 		<transition>
 			<source ref="id6"/>
@@ -133,7 +171,7 @@ and not isPartSunken()</label>
 		<transition>
 			<source ref="id6"/>
 			<target ref="id2"/>
-			<label kind="guard" x="-40" y="152">progress_time &gt; 10
+			<label kind="guard" x="-32" y="200">progress_time &gt; 10
 and not isPartSunken()</label>
 			<nail x="40" y="96"/>
 			<nail x="-8" y="192"/>
@@ -147,7 +185,6 @@ and not isPartSunken()</label>
 	<template>
 		<name>Ship</name>
 		<declaration>clock periodTime;
-clock sunkTime;
 
 int sinkingPart;
 
@@ -179,7 +216,6 @@ bool isShipSunken(){
 		</location>
 		<location id="id9" x="-2712" y="-8">
 			<name x="-2728" y="32">SHIP_SUNKEN</name>
-			<urgent/>
 		</location>
 		<location id="id10" x="-2736" y="-112">
 			<name x="-2744" y="-160">SHIP_FLOATING</name>
@@ -194,25 +230,16 @@ bool isShipSunken(){
 		<transition>
 			<source ref="id8"/>
 			<target ref="id10"/>
-			<label kind="select" x="-3776" y="-208">p1 : position_people_start_count_type,
-p2 : position_people_start_count_type,
-p3 : position_people_start_count_type,
-p4 : position_people_start_count_type</label>
-			<label kind="guard" x="-3776" y="-128">p1 + p2 + p3 + p4 == START_PASSANGER_COUNT</label>
-			<label kind="assignment" x="-3776" y="-96">positionPeopleCount[0] = p1,
-positionPeopleCount[1] = p2,
-positionPeopleCount[2] = p3,
-positionPeopleCount[3] = p4,
-floodedParts[0] = false,
+			<label kind="assignment" x="-3664" y="-32">floodedParts[0] = false,
 floodedParts[1] = false,
 floodedParts[2] = false,
-floodedParts[3] = false</label>
-		</transition>
-		<transition>
-			<source ref="id9"/>
-			<target ref="id9"/>
-			<nail x="-2648" y="24"/>
-			<nail x="-2656" y="-32"/>
+floodedParts[3] = false,
+positionPeopleCount[0] = 100,
+positionPeopleCount[1] = 100,
+positionPeopleCount[2] = 10,
+positionPeopleCount[3] = 50, 
+peopleCountOnBoard = positionPeopleCount[0]+positionPeopleCount[1] + positionPeopleCount[2] + positionPeopleCount[3],
+peopleCountAtStart = peopleCountOnBoard</label>
 		</transition>
 		<transition>
 			<source ref="id10"/>
@@ -247,36 +274,42 @@ void manageSendingPeople(){
         return;
     }
     //restrict val for channel 
-    if(sendPeople &gt; SIZE_CHANNEL){
-        sendPeople = SIZE_CHANNEL;
+    if(sendPeople &gt; MAX_SEND_PEOPLE_AMOUNT){
+        sendPeople = MAX_SEND_PEOPLE_AMOUNT;
+    }
+    //don't send all people. At least one person should stay in position
+    if(sendPeople == positionPeopleCount[partIndex]){
+        sendPeople = sendPeople - 1;
     }
     positionPeopleCount[LAST_POSITION] = positionPeopleCount[LAST_POSITION] + sendPeople;
+    positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - sendPeople;
 }
 
 void manageSavePeople(){
     int i;
 	//save people - let them jump to boat
 	int savedPeople = SAVED_AMOUNT;
-	if(positionPeopleCount[partIndex] &lt;= 10){
-		savedPeople = positionPeopleCount[partIndex];
+	if(positionPeopleCount[partIndex] &lt;= SAVED_AMOUNT){
+        // HazardPlayer cannot leave the ship
+		savedPeople = positionPeopleCount[partIndex] - 1;
 	}
 	positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - savedPeople;
-	passangerCountOnBoard = passangerCountOnBoard - savedPeople;
+	peopleCountOnBoard = peopleCountOnBoard - savedPeople;
 }</declaration>
 		<location id="id11" x="416" y="24">
-			<name x="400" y="-32">Sending_people</name>
+			<name x="400" y="-32">SENDING_PEOPLE</name>
 			<label kind="invariant" x="400" y="-16">progress_time &lt; 8</label>
 		</location>
 		<location id="id12" x="-16" y="-168">
-			<name x="-26" y="-198">Init</name>
+			<name x="-26" y="-198">INIT</name>
 			<committed/>
 		</location>
 		<location id="id13" x="216" y="248">
-			<name x="206" y="218">Dead</name>
+			<name x="248" y="256">DEAD</name>
 		</location>
 		<location id="id14" x="0" y="0">
-			<name x="-88" y="-72">Ruling</name>
-			<label kind="invariant" x="-88" y="-56">progress_time &lt; 20</label>
+			<name x="-96" y="-40">RULING</name>
+			<label kind="invariant" x="-152" y="-24">progress_time &lt; 20</label>
 		</location>
 		<init ref="id12"/>
 		<transition>
@@ -287,9 +320,9 @@ void manageSavePeople(){
 		<transition>
 			<source ref="id11"/>
 			<target ref="id14"/>
-			<label kind="guard" x="128" y="16">progress_time &gt; 5
+			<label kind="guard" x="136" y="64">progress_time &gt; 5
 and not isPartSunken()</label>
-			<label kind="assignment" x="128" y="56">manageSendingPeople()</label>
+			<label kind="assignment" x="136" y="88">manageSendingPeople()</label>
 			<nail x="248" y="56"/>
 			<nail x="112" y="56"/>
 		</transition>
@@ -331,40 +364,67 @@ bool isPartSunken(){
 	return floodedParts[partIndex];
 }
 
+//sends third to position
+void sendThirdToPosition(int position, int amount, bool isSendingToLastPosition){
+    int sendPeople = amount;
+    if(floodedParts[position] || positionPeopleCount[position] == 0){
+        return;
+    }
+    //if sending to last position and amount is lower than max send - send more to the highest position
+    // but keep priest in position
+    if(isSendingToLastPosition &amp;&amp; amount &lt; MAX_SEND_PEOPLE_AMOUNT/MAX_SEND_PLACES_COUNT){
+        sendPeople = positionPeopleCount[partIndex] - 1;
+    }
+    positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - sendPeople;
+    positionPeopleCount[position] = positionPeopleCount[position] + sendPeople;    
+}
+
 void manageSendingPeople(){
     int i;
-	//send new people
-    // dont send to channel, which sunk
+    int sendPeople;
+    //positionPeopleCount[partIndex] - 1  =&gt; keep priest at the position
+    if(positionPeopleCount[partIndex] - 1 &gt; MAX_SEND_PEOPLE_AMOUNT){
+         //MAX_SEND_PEOPLE_AMOUNT is chosen to be divisible by MAX_SEND_PLACES_COUNT
+         sendPeople =  MAX_SEND_PEOPLE_AMOUNT/MAX_SEND_PLACES_COUNT;
+    } else{
+        //positionPeopleCount[partIndex] - 1  =&gt; keep priest at the position
+         sendPeople = (positionPeopleCount[partIndex] - 1)/MAX_SEND_PLACES_COUNT;
+    }
+	//send people to all other positions
+    //sends from the lowest position - important
 	for(i = 0; i &lt; 4 ; i++){
-		//channels[partIndex][i] = SIZE_CHANNEL - channels[i][partIndex];
-		//don't send negative amount of people...
+        if(i != partIndex){
+            //i == lastPosition - rest of division is send to (or stay in position if partIndex == 4) lastPosition if needed
+            sendThirdToPosition(i, sendPeople, i == LAST_POSITION);
+        }
 	}
 }
 
 void manageSavePeople(){
-    int i;
+   int i;
 	//save people - let them jump to boat
-	int savedPeople = 10;
-	if(positionPeopleCount[partIndex] &lt; 10){
-		savedPeople = positionPeopleCount[partIndex];
+	int savedPeople = SAVED_AMOUNT;
+    //priest can't leave the ship
+	if(positionPeopleCount[partIndex] &lt;= SAVED_AMOUNT){
+		savedPeople = positionPeopleCount[partIndex] - 1 ;
 	}
 	positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - savedPeople;
-	passangerCountOnBoard = passangerCountOnBoard - savedPeople;
+	peopleCountOnBoard = peopleCountOnBoard - savedPeople;
 }</declaration>
 		<location id="id15" x="416" y="24">
-			<name x="400" y="-32">Sending_people</name>
+			<name x="400" y="-32">SENDING_PEOPLE</name>
 			<label kind="invariant" x="400" y="-16">progress_time &lt; 8</label>
 		</location>
 		<location id="id16" x="-16" y="-168">
-			<name x="-26" y="-198">Init</name>
+			<name x="-26" y="-198">INIT</name>
 			<committed/>
 		</location>
 		<location id="id17" x="216" y="248">
-			<name x="206" y="218">Dead</name>
+			<name x="248" y="232">DEAD</name>
 		</location>
 		<location id="id18" x="0" y="0">
-			<name x="-88" y="-72">Ruling</name>
-			<label kind="invariant" x="-88" y="-56">progress_time &lt; 20</label>
+			<name x="-88" y="-72">RULING</name>
+			<label kind="invariant" x="-152" y="-56">progress_time &lt; 20</label>
 		</location>
 		<init ref="id16"/>
 		<transition>
@@ -375,9 +435,9 @@ void manageSavePeople(){
 		<transition>
 			<source ref="id15"/>
 			<target ref="id18"/>
-			<label kind="guard" x="128" y="40">progress_time &gt; 5
+			<label kind="guard" x="128" y="56">progress_time &gt; 5
 and not isPartSunken()</label>
-			<label kind="assignment" x="128" y="72">manageSendingPeople()</label>
+			<label kind="assignment" x="128" y="88">manageSendingPeople()</label>
 			<nail x="248" y="56"/>
 			<nail x="112" y="56"/>
 		</transition>
@@ -411,12 +471,8 @@ progress_time = 0</label>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
-//ship = Ship(period_time, move_people, boat_sunken, time_progress);
-int captain_index = 2;
-//captain = Captain (boat_sunken, move_people, people_amount, captain_index);
 
 // List one or more processes to be composed into a system.
-//system captain, timer;
 
 int index_0 = 0;
 
@@ -426,10 +482,28 @@ int index_2 = 2;
 
 int index_3 = 3;
 
-position1 = HazardPlayer(index_0, floodedPartsChan[0]);
-position2 = HazardPlayer(index_1, floodedPartsChan[1]);
-position3 = HazardPlayer(index_2, floodedPartsChan[2]);
-position4 = HazardPlayer(index_3, floodedPartsChan[3]);
+//-----  4 HAZARD_PLAYERS - should be best in saving people in low amount of people and low time----------------------------
+//----- TEST DISTRIBUTION 100, 100, 100, 100 TIME : 100
+//position1 = HazardPlayer(index_0, floodedPartsChan[0]);
+//position2 = HazardPlayer(index_1, floodedPartsChan[1]);
+//position3 = HazardPlayer(index_2, floodedPartsChan[2]);
+//position4 = HazardPlayer(index_3, floodedPartsChan[3]);
+
+//----- 4 CAPTAINS - should be best at saving CAPTAIN ----------------------
+//----- TEST DISTRIBUTION 100, 100, 10, 50 TIME : 100
+//position1 = Captain(index_0, floodedPartsChan[0]);
+//position2 = Captain(index_1, floodedPartsChan[1]);
+//position3 = Captain(index_2, floodedPartsChan[2]);
+//position4 = Captain(index_3, floodedPartsChan[3]);
+
+//----- 4 PRIESTS - should be worst at BOTH ----------------------
+//----- TEST DISTRIBUTION 100, 100, 10, 50 TIME : 100
+position1 = Priest(index_0, floodedPartsChan[0]);
+position2 = Priest(index_1, floodedPartsChan[1]);
+position3 = Priest(index_2, floodedPartsChan[2]);
+position4 = Priest(index_3, floodedPartsChan[3]);
+
+
 ship = Ship();
 
 system ship, position1, position2, position3, position4;</system>
