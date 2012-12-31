@@ -38,51 +38,78 @@ typedef urgent chan flooded_parts_channel_type [POSITION_COUNT];
 //flags of flooded parts of boat 
 flooded_parts_type floodedParts;
 flooded_parts_channel_type floodedPartsChan;
+
+// type for incomming people channel
+typedef urgent chan incomming_people_type [POSITION_COUNT];
+incomming_people_type incommingPeopleChan;
 </declaration>
 	<template>
 		<name>Priest</name>
-		<parameter>int &amp; partIndex, urgent chan&amp; sink</parameter>
+		<parameter>int &amp; partIndex, urgent chan&amp; sink, urgent chan&amp; incommingPeople, bool isCaptain</parameter>
 		<declaration>clock progress_time;</declaration>
-		<location id="id0" x="-304" y="104">
-			<committed/>
+		<location id="id0" x="-560" y="200">
+			<name x="-736" y="128">FLOODED_POSITION_AND_PLAYER_SAVED</name>
 		</location>
-		<location id="id1" x="-56" y="-32">
+		<location id="id1" x="-304" y="104">
+			<name x="-368" y="48">PLAYER_CAN_BE_SAVED</name>
+		</location>
+		<location id="id2" x="-56" y="-32">
 			<name x="-66" y="-62">INIT</name>
 			<committed/>
 		</location>
-		<location id="id2" x="168" y="320">
+		<location id="id3" x="168" y="320">
 			<name x="192" y="312">DEAD</name>
 		</location>
-		<location id="id3" x="0" y="192">
+		<location id="id4" x="0" y="192">
 			<name x="-96" y="152">RULING</name>
 			<label kind="invariant" x="-152" y="168">progress_time &lt;= 20</label>
 		</location>
-		<location id="id4" x="-336" y="-64">
-			<name x="-346" y="-94">FLOODED_POSITION_AND_CAPTAIN_SAVED</name>
+		<location id="id5" x="-560" y="-24">
+			<name x="-728" y="-56">FLOODED_POSITION_AND_CAPTAIN_SAVED</name>
 			<label kind="comments">UNREACHABLE - EXIST for model checking</label>
 		</location>
-		<init ref="id1"/>
+		<init ref="id2"/>
 		<transition>
-			<source ref="id0"/>
-			<target ref="id3"/>
-			<nail x="-304" y="192"/>
-		</transition>
-		<transition>
-			<source ref="id3"/>
+			<source ref="id1"/>
 			<target ref="id0"/>
-			<label kind="guard" x="-280" y="48">positionPeopleCount[partIndex] == 0
-&amp;&amp; progress_time == 20</label>
-			<label kind="assignment" x="-280" y="80">progress_time = 0</label>
-			<nail x="-64" y="104"/>
+			<label kind="guard" x="-472" y="168">isCaptain == false</label>
+			<label kind="synchronisation" x="-472" y="183">sink?</label>
 		</transition>
 		<transition>
 			<source ref="id1"/>
-			<target ref="id3"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-456" y="-8">isCaptain == true</label>
+			<label kind="synchronisation" x="-456" y="7">sink?</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="80" y="112">incommingPeople?</label>
+			<nail x="40" y="104"/>
+			<nail x="104" y="160"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-296" y="136">incommingPeople?</label>
+			<label kind="assignment" x="-296" y="152">progress_time = 20</label>
+			<nail x="-304" y="192"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-288" y="64">progress_time &gt; 10
+&amp;&amp; positionPeopleCount[partIndex] == 0</label>
+			<nail x="-64" y="104"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id4"/>
 			<label kind="assignment" x="-96" y="-8">progress_time = 0</label>
 		</transition>
 		<transition>
-			<source ref="id3"/>
-			<target ref="id3"/>
+			<source ref="id4"/>
+			<target ref="id4"/>
 			<label kind="select" x="-376" y="320">savedPeople : int[1,SAVED_AMOUNT]</label>
 			<label kind="guard" x="-376" y="336">progress_time &gt; 10
 &amp;&amp; (savedPeople == SAVED_AMOUNT &amp;&amp; savedPeople &lt;= positionPeopleCount[partIndex]
@@ -95,110 +122,110 @@ progress_time = 0</label>
 			<nail x="-360" y="296"/>
 		</transition>
 		<transition>
-			<source ref="id3"/>
-			<target ref="id2"/>
+			<source ref="id4"/>
+			<target ref="id3"/>
 			<label kind="synchronisation" x="96" y="256">sink?</label>
 		</transition>
 	</template>
 	<template>
 		<name>Ship</name>
 		<declaration>clock periodTime;</declaration>
-		<location id="id5" x="-2616" y="240">
+		<location id="id6" x="-2616" y="240">
 			<name x="-2600" y="208">SINK_PART_4</name>
 			<label kind="invariant" x="-2600" y="224">periodTime &lt;= PERIOD_TIME_MAX</label>
 			<committed/>
 		</location>
-		<location id="id6" x="-2616" y="80">
+		<location id="id7" x="-2616" y="80">
 			<name x="-2600" y="48">SUNKEN_PART_3</name>
 			<label kind="invariant" x="-2600" y="64">periodTime &lt;= PERIOD_TIME_MAX</label>
 		</location>
-		<location id="id7" x="-2824" y="-56">
+		<location id="id8" x="-2824" y="-56">
 			<name x="-2960" y="-80">SUNKEN_PART_2</name>
 			<label kind="invariant" x="-3072" y="-64">periodTime &lt;= PERIOD_TIME_MAX</label>
 		</location>
-		<location id="id8" x="-2608" y="-168">
+		<location id="id9" x="-2608" y="-168">
 			<name x="-2592" y="-200">SUNKEN_PART_1</name>
 			<label kind="invariant" x="-2592" y="-184">periodTime &lt;= PERIOD_TIME_MAX</label>
 		</location>
-		<location id="id9" x="-2824" y="80">
+		<location id="id10" x="-2824" y="80">
 			<name x="-2928" y="40">SINK_PART_3</name>
 			<committed/>
 		</location>
-		<location id="id10" x="-2824" y="-168">
+		<location id="id11" x="-2824" y="-168">
 			<name x="-2904" y="-200">SINK_PART_1</name>
 			<committed/>
 		</location>
-		<location id="id11" x="-3496" y="-168">
+		<location id="id12" x="-3496" y="-168">
 			<name x="-3640" y="-216">INITIAL_UPDATE_VARIABLES</name>
 			<committed/>
 		</location>
-		<location id="id12" x="-2816" y="240">
+		<location id="id13" x="-2816" y="240">
 			<name x="-2872" y="208">SHIP_SUNKEN</name>
 		</location>
-		<location id="id13" x="-3232" y="-168">
+		<location id="id14" x="-3232" y="-168">
 			<name x="-3264" y="-216">SHIP_FLOATING</name>
 			<label kind="invariant" x="-3336" y="-200">periodTime &lt;= PERIOD_TIME_MAX</label>
 		</location>
-		<location id="id14" x="-2608" y="-56">
+		<location id="id15" x="-2608" y="-56">
 			<name x="-2592" y="-88">SINK_PART_2</name>
 			<committed/>
 		</location>
-		<init ref="id11"/>
+		<init ref="id12"/>
 		<transition>
-			<source ref="id5"/>
-			<target ref="id12"/>
+			<source ref="id6"/>
+			<target ref="id13"/>
 			<label kind="synchronisation" x="-2784" y="248">floodedPartsChan[3]!</label>
 			<label kind="assignment" x="-2784" y="264">floodedParts[3] = true</label>
 		</transition>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id9"/>
+			<source ref="id8"/>
+			<target ref="id10"/>
 			<label kind="guard" x="-3056" y="-16">periodTime &gt;= PERIOD_TIME_MIN</label>
 			<label kind="assignment" x="-2928" y="0">periodTime = 0</label>
 		</transition>
 		<transition>
-			<source ref="id8"/>
-			<target ref="id14"/>
+			<source ref="id9"/>
+			<target ref="id15"/>
 			<label kind="guard" x="-2600" y="-136">periodTime &gt;= PERIOD_TIME_MIN</label>
 			<label kind="assignment" x="-2600" y="-120">periodTime = 0</label>
 		</transition>
 		<transition>
-			<source ref="id6"/>
-			<target ref="id5"/>
+			<source ref="id7"/>
+			<target ref="id6"/>
 			<label kind="guard" x="-2608" y="144">periodTime &gt;= PERIOD_TIME_MIN</label>
 			<label kind="assignment" x="-2608" y="160">periodTime = 0</label>
 		</transition>
 		<transition>
-			<source ref="id9"/>
-			<target ref="id6"/>
+			<source ref="id10"/>
+			<target ref="id7"/>
 			<label kind="synchronisation" x="-2784" y="88">floodedPartsChan[2]!</label>
 			<label kind="assignment" x="-2784" y="104">floodedParts[2] = true</label>
 		</transition>
 		<transition>
-			<source ref="id14"/>
-			<target ref="id7"/>
+			<source ref="id15"/>
+			<target ref="id8"/>
 			<label kind="synchronisation" x="-2768" y="-48">floodedPartsChan[1]!</label>
 			<label kind="assignment" x="-2768" y="-32">floodedParts[1] = true</label>
 		</transition>
 		<transition>
-			<source ref="id12"/>
-			<target ref="id12"/>
+			<source ref="id13"/>
+			<target ref="id13"/>
 			<nail x="-2792" y="264"/>
 			<nail x="-2856" y="264"/>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id8"/>
+			<source ref="id11"/>
+			<target ref="id9"/>
 			<label kind="synchronisation" x="-2784" y="-168">floodedPartsChan[0]!</label>
 			<label kind="assignment" x="-2784" y="-152">floodedParts[0] = true</label>
 		</transition>
 		<transition>
-			<source ref="id11"/>
-			<target ref="id13"/>
-			<label kind="assignment" x="-3536" y="-144">positionPeopleCount[0] = 5,
-positionPeopleCount[1] = 30,
-positionPeopleCount[2] = 30,
-positionPeopleCount[3] = 30, 
+			<source ref="id12"/>
+			<target ref="id14"/>
+			<label kind="assignment" x="-3536" y="-144">positionPeopleCount[0] = 50,
+positionPeopleCount[1] = 50,
+positionPeopleCount[2] = 50,
+positionPeopleCount[3] = 50, 
 peopleCountOnBoard = positionPeopleCount[0]+positionPeopleCount[1]
 + positionPeopleCount[2]+positionPeopleCount[3],
 peopleCountAtStart = peopleCountOnBoard,
@@ -208,99 +235,122 @@ floodedParts[2] = false,
 floodedParts[3] = false</label>
 		</transition>
 		<transition>
-			<source ref="id13"/>
-			<target ref="id10"/>
+			<source ref="id14"/>
+			<target ref="id11"/>
 			<label kind="guard" x="-3128" y="-168">periodTime &gt;= PERIOD_TIME_MIN</label>
 			<label kind="assignment" x="-3128" y="-152">periodTime = 0</label>
 		</transition>
 	</template>
 	<template>
 		<name>HazardPlayer</name>
-		<parameter>int &amp; partIndex, urgent chan&amp; sink</parameter>
+		<parameter>int &amp; partIndex, urgent chan&amp; sink, urgent chan&amp; incommingPeople, bool isCaptain</parameter>
 		<declaration>clock progress_time;</declaration>
-		<location id="id15" x="-304" y="104">
+		<location id="id16" x="-616" y="192">
+			<name x="-626" y="162">FLOODED_POSITION_AND_PLAYER_SAVED</name>
+		</location>
+		<location id="id17" x="-304" y="104">
+			<name x="-400" y="40">PLAYER_CAN_BE_SAVED</name>
+		</location>
+		<location id="id18" x="536" y="-40">
 			<committed/>
 		</location>
-		<location id="id16" x="536" y="-40">
-			<committed/>
-		</location>
-		<location id="id17" x="320" y="192">
+		<location id="id19" x="320" y="192">
 			<name x="280" y="144">SENDING_PEOPLE</name>
 			<label kind="invariant" x="280" y="160">progress_time &lt; 8</label>
 			<label kind="comments">People start walking on time progress_time == 0 and arrive to another part between time progress_time from 5 to 8.</label>
 		</location>
-		<location id="id18" x="-56" y="-32">
+		<location id="id20" x="-56" y="-32">
 			<name x="-66" y="-62">INIT</name>
 			<committed/>
 		</location>
-		<location id="id19" x="168" y="320">
+		<location id="id21" x="168" y="320">
 			<name x="192" y="312">DEAD</name>
 		</location>
-		<location id="id20" x="0" y="192">
+		<location id="id22" x="0" y="192">
 			<name x="-96" y="152">RULING</name>
 			<label kind="invariant" x="-152" y="168">progress_time &lt;= 20</label>
 		</location>
-		<location id="id21" x="-336" y="-64">
-			<name x="-346" y="-94">FLOODED_POSITION_AND_CAPTAIN_SAVED</name>
+		<location id="id23" x="-624" y="-40">
+			<name x="-634" y="-70">FLOODED_POSITION_AND_CAPTAIN_SAVED</name>
 			<label kind="comments">UNREACHABLE - EXIST for model checking</label>
 		</location>
-		<init ref="id18"/>
+		<init ref="id20"/>
 		<transition>
-			<source ref="id15"/>
-			<target ref="id20"/>
+			<source ref="id17"/>
+			<target ref="id16"/>
+			<label kind="guard" x="-528" y="112">isCaptain == false</label>
+			<label kind="synchronisation" x="-528" y="128">sink?</label>
+		</transition>
+		<transition>
+			<source ref="id17"/>
+			<target ref="id23"/>
+			<label kind="guard" x="-496" y="-32">isCaptain == true</label>
+			<label kind="synchronisation" x="-496" y="-16">sink?</label>
+		</transition>
+		<transition>
+			<source ref="id22"/>
+			<target ref="id22"/>
+			<label kind="synchronisation" x="-136" y="256">incommingPeople?</label>
+			<nail x="-8" y="256"/>
+			<nail x="-104" y="256"/>
+		</transition>
+		<transition>
+			<source ref="id17"/>
+			<target ref="id22"/>
+			<label kind="synchronisation" x="-304" y="152">incommingPeople?</label>
+			<label kind="assignment" x="-304" y="168">progress_time = 20</label>
 			<nail x="-304" y="192"/>
 		</transition>
 		<transition>
-			<source ref="id20"/>
-			<target ref="id15"/>
-			<label kind="guard" x="-280" y="48">positionPeopleCount[partIndex] == 0
-&amp;&amp; progress_time == 20</label>
-			<label kind="assignment" x="-280" y="80">progress_time = 0</label>
+			<source ref="id22"/>
+			<target ref="id17"/>
+			<label kind="guard" x="-280" y="64">progress_time &gt; 10
+&amp;&amp; positionPeopleCount[partIndex] == 0</label>
 			<nail x="-64" y="104"/>
 		</transition>
 		<transition>
-			<source ref="id16"/>
-			<target ref="id20"/>
-			<label kind="select" x="48" y="-168">amount : int[0,MAX_SEND_PEOPLE_AMOUNT]</label>
-			<label kind="guard" x="48" y="-144">floodedParts[(partIndex+1)%4] == false
+			<source ref="id18"/>
+			<target ref="id22"/>
+			<label kind="select" x="48" y="-184">amount : int[1,MAX_SEND_PEOPLE_AMOUNT]</label>
+			<label kind="guard" x="48" y="-160">floodedParts[(partIndex+1)%4] == false
 and positionPeopleCount[partIndex] &gt;= amount
 and (amount == MAX_SEND_PEOPLE_AMOUNT or amount == positionPeopleCount[partIndex])</label>
+			<label kind="synchronisation" x="48" y="-112">incommingPeopleChan[(partIndex+1)%4]!</label>
 			<label kind="assignment" x="48" y="-96">positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - amount,
 positionPeopleCount[(partIndex+1)%4] = positionPeopleCount[(partIndex+1)%4] + amount</label>
 			<label kind="comments">Send ppl to another part (can send to self)</label>
 			<nail x="96" y="-40"/>
 		</transition>
 		<transition>
-			<source ref="id16"/>
-			<target ref="id20"/>
-			<label kind="guard" x="264" y="40">floodedParts[(partIndex+1)%4] == true</label>
+			<source ref="id18"/>
+			<target ref="id22"/>
 			<label kind="comments">Dont send if part is flooded.</label>
 		</transition>
 		<transition>
-			<source ref="id17"/>
-			<target ref="id19"/>
+			<source ref="id19"/>
+			<target ref="id21"/>
 			<label kind="synchronisation" x="216" y="256">sink?</label>
 		</transition>
 		<transition>
-			<source ref="id17"/>
-			<target ref="id16"/>
+			<source ref="id19"/>
+			<target ref="id18"/>
 			<label kind="guard" x="400" y="192">progress_time &gt; 5</label>
 			<nail x="536" y="192"/>
 		</transition>
 		<transition>
-			<source ref="id20"/>
-			<target ref="id17"/>
+			<source ref="id22"/>
+			<target ref="id19"/>
 			<label kind="guard" x="48" y="192">progress_time == 0
 and positionPeopleCount[partIndex] &gt; 1</label>
 		</transition>
 		<transition>
-			<source ref="id18"/>
-			<target ref="id20"/>
+			<source ref="id20"/>
+			<target ref="id22"/>
 			<label kind="assignment" x="-96" y="-8">progress_time = 0</label>
 		</transition>
 		<transition>
-			<source ref="id20"/>
-			<target ref="id20"/>
+			<source ref="id22"/>
+			<target ref="id22"/>
 			<label kind="select" x="-376" y="320">savedPeople : int[1,SAVED_AMOUNT]</label>
 			<label kind="guard" x="-376" y="336">progress_time &gt; 10
 &amp;&amp; (savedPeople == SAVED_AMOUNT &amp;&amp; savedPeople &lt;= positionPeopleCount[partIndex]
@@ -313,166 +363,189 @@ progress_time = 0</label>
 			<nail x="-360" y="296"/>
 		</transition>
 		<transition>
-			<source ref="id20"/>
-			<target ref="id19"/>
+			<source ref="id22"/>
+			<target ref="id21"/>
 			<label kind="synchronisation" x="96" y="256">sink?</label>
 		</transition>
 	</template>
 	<template>
-		<name>Captain</name>
-		<parameter>int &amp; partIndex, urgent chan&amp; sink</parameter>
+		<name>NondeterministicPlayer</name>
+		<parameter>int &amp; partIndex, urgent chan&amp; sink, urgent chan&amp; incommingPeople, bool isCaptain</parameter>
 		<declaration>clock progress_time;</declaration>
-		<location id="id22" x="-416" y="104">
-			<name x="-528" y="56">CAPTAIN_CAN_BE_SAVED</name>
-			<label kind="invariant" x="-528" y="72">positionPeopleCount[partIndex] == 0</label>
+		<location id="id24" x="-726" y="166">
+			<name x="-736" y="136">FLOODED_POSITION_AND_PLAYER_SAVED</name>
 		</location>
-		<location id="id23" x="536" y="-40">
+		<location id="id25" x="-416" y="104">
+			<name x="-520" y="72">PLAYER_CAN_BE_SAVED</name>
+		</location>
+		<location id="id26" x="536" y="-40">
 			<committed/>
 		</location>
-		<location id="id24" x="848" y="-40">
+		<location id="id27" x="848" y="-40">
 			<committed/>
 		</location>
-		<location id="id25" x="848" y="192">
+		<location id="id28" x="848" y="192">
 			<committed/>
 		</location>
-		<location id="id26" x="528" y="192">
+		<location id="id29" x="528" y="192">
 			<committed/>
 		</location>
-		<location id="id27" x="320" y="192">
+		<location id="id30" x="320" y="192">
 			<name x="280" y="144">SENDING_PEOPLE</name>
 			<label kind="invariant" x="280" y="160">progress_time &lt; 8</label>
 			<label kind="comments">People start walking on time progress_time == 0 and arrive to another part between time progress_time from 5 to 8.</label>
 		</location>
-		<location id="id28" x="-56" y="-32">
+		<location id="id31" x="-56" y="-32">
 			<name x="-66" y="-62">INIT</name>
 			<committed/>
 		</location>
-		<location id="id29" x="168" y="320">
+		<location id="id32" x="168" y="320">
 			<name x="192" y="312">DEAD</name>
 		</location>
-		<location id="id30" x="0" y="192">
+		<location id="id33" x="0" y="192">
 			<name x="-112" y="136">RULING</name>
 			<label kind="invariant" x="-112" y="152">progress_time &lt;= 20</label>
 		</location>
-		<location id="id31" x="-472" y="-24">
-			<name x="-482" y="-54">FLOODED_POSITION_AND_CAPTAIN_SAVED</name>
+		<location id="id34" x="-720" y="-8">
+			<name x="-730" y="-38">FLOODED_POSITION_AND_CAPTAIN_SAVED</name>
 			<label kind="comments">UNREACHABLE - EXIST for model checking</label>
 		</location>
-		<init ref="id28"/>
+		<init ref="id31"/>
 		<transition>
-			<source ref="id22"/>
-			<target ref="id31"/>
-			<label kind="synchronisation" x="-448" y="0">sink?</label>
-		</transition>
-		<transition>
-			<source ref="id22"/>
-			<target ref="id30"/>
-			<label kind="guard" x="-376" y="152">positionPeopleCount[partIndex] != 0</label>
-			<label kind="assignment" x="-376" y="168">progress_time = 0</label>
-			<nail x="-416" y="192"/>
+			<source ref="id25"/>
+			<target ref="id24"/>
+			<label kind="guard" x="-624" y="96">isCaptain == false</label>
+			<label kind="synchronisation" x="-624" y="112">sink?</label>
 		</transition>
 		<transition>
 			<source ref="id30"/>
-			<target ref="id22"/>
+			<target ref="id30"/>
+			<label kind="synchronisation" x="304" y="256">incommingPeople?</label>
+			<nail x="392" y="256"/>
+			<nail x="304" y="256"/>
+		</transition>
+		<transition>
+			<source ref="id33"/>
+			<target ref="id33"/>
+			<label kind="synchronisation" x="-108" y="241">incommingPeople?</label>
+			<nail x="-16" y="240"/>
+			<nail x="-80" y="240"/>
+		</transition>
+		<transition>
+			<source ref="id25"/>
+			<target ref="id33"/>
+			<label kind="synchronisation" x="-384" y="152">incommingPeople?</label>
+			<label kind="assignment" x="-384" y="168">progress_time = 20</label>
+			<nail x="-416" y="192"/>
+		</transition>
+		<transition>
+			<source ref="id25"/>
+			<target ref="id34"/>
+			<label kind="guard" x="-616" y="-8">isCaptain == true</label>
+			<label kind="synchronisation" x="-616" y="8">sink?</label>
+		</transition>
+		<transition>
+			<source ref="id33"/>
+			<target ref="id25"/>
 			<label kind="guard" x="-280" y="64">progress_time &gt; 10
 &amp;&amp; positionPeopleCount[partIndex] == 0</label>
 			<nail x="-64" y="104"/>
 		</transition>
 		<transition>
-			<source ref="id23"/>
-			<target ref="id30"/>
-			<label kind="select" x="48" y="-136">amount : int[0,MAX_SEND_PEOPLE_AMOUNT]</label>
-			<label kind="guard" x="48" y="-120">floodedParts[3] == false
+			<source ref="id26"/>
+			<target ref="id33"/>
+			<label kind="select" x="48" y="-152">amount : int[1,MAX_SEND_PEOPLE_AMOUNT]</label>
+			<label kind="guard" x="48" y="-136">floodedParts[3] == false
 and positionPeopleCount[partIndex] &gt;= amount</label>
+			<label kind="synchronisation" x="48" y="-104">incommingPeopleChan[3]!</label>
 			<label kind="assignment" x="48" y="-88">positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - amount,
 positionPeopleCount[3] = positionPeopleCount[3] + amount</label>
 			<label kind="comments">Send ppl to another part (can send to self)</label>
 			<nail x="96" y="-40"/>
 		</transition>
 		<transition>
-			<source ref="id24"/>
-			<target ref="id23"/>
-			<label kind="select" x="568" y="-240">amount : int[0,MAX_SEND_PEOPLE_AMOUNT]</label>
-			<label kind="guard" x="568" y="-224">floodedParts[2] == false
+			<source ref="id27"/>
+			<target ref="id26"/>
+			<label kind="select" x="544" y="-200">amount : int[1,MAX_SEND_PEOPLE_AMOUNT]</label>
+			<label kind="guard" x="544" y="-184">floodedParts[2] == false
 and positionPeopleCount[partIndex] &gt;= amount</label>
-			<label kind="assignment" x="568" y="-192">positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - amount,
+			<label kind="synchronisation" x="544" y="-152">incommingPeopleChan[2]!</label>
+			<label kind="assignment" x="544" y="-128">positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - amount,
 positionPeopleCount[2] = positionPeopleCount[2] + amount</label>
 			<label kind="comments">Send ppl to another part (can send to self)</label>
-			<nail x="848" y="-192"/>
-			<nail x="536" y="-192"/>
+			<nail x="848" y="-88"/>
+			<nail x="536" y="-88"/>
 		</transition>
 		<transition>
-			<source ref="id25"/>
-			<target ref="id24"/>
-			<label kind="select" x="960" y="24">amount : int[0,MAX_SEND_PEOPLE_AMOUNT]</label>
-			<label kind="guard" x="960" y="40">floodedParts[1] == false
+			<source ref="id28"/>
+			<target ref="id27"/>
+			<label kind="select" x="928" y="24">amount : int[1,MAX_SEND_PEOPLE_AMOUNT]</label>
+			<label kind="guard" x="928" y="40">floodedParts[1] == false
 and positionPeopleCount[partIndex] &gt;= amount</label>
-			<label kind="assignment" x="960" y="72">positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - amount,
+			<label kind="synchronisation" x="928" y="72">incommingPeopleChan[1]!</label>
+			<label kind="assignment" x="928" y="88">positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - amount,
 positionPeopleCount[1] = positionPeopleCount[1] + amount</label>
 			<label kind="comments">Send ppl to another part (can send to self)</label>
-			<nail x="1112" y="192"/>
-			<nail x="1112" y="-40"/>
+			<nail x="912" y="192"/>
+			<nail x="912" y="-40"/>
 		</transition>
 		<transition>
-			<source ref="id26"/>
-			<target ref="id25"/>
-			<label kind="guard" x="592" y="192">floodedParts[0] == true</label>
-			<label kind="comments">Dont send if part is flooded.</label>
-		</transition>
-		<transition>
-			<source ref="id23"/>
-			<target ref="id30"/>
-			<label kind="guard" x="264" y="40">floodedParts[3] == true</label>
-			<label kind="comments">Dont send if part is flooded.</label>
-		</transition>
-		<transition>
-			<source ref="id24"/>
-			<target ref="id23"/>
-			<label kind="guard" x="576" y="-32">floodedParts[2] == true</label>
-			<label kind="comments">Dont send if part is flooded.</label>
-		</transition>
-		<transition>
-			<source ref="id25"/>
-			<target ref="id24"/>
-			<label kind="guard" x="696" y="56">floodedParts[1] == true</label>
+			<source ref="id29"/>
+			<target ref="id28"/>
 			<label kind="comments">Dont send if part is flooded.</label>
 		</transition>
 		<transition>
 			<source ref="id26"/>
-			<target ref="id25"/>
-			<label kind="select" x="544" y="296">amount : int[0,MAX_SEND_PEOPLE_AMOUNT]</label>
-			<label kind="guard" x="544" y="320">floodedParts[0] == false
-and positionPeopleCount[partIndex] &gt;= amount</label>
-			<label kind="assignment" x="544" y="352">positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - amount,
-positionPeopleCount[0] = positionPeopleCount[0] + amount</label>
-			<label kind="comments">Send ppl to another part (can send to self)</label>
-			<nail x="528" y="296"/>
-			<nail x="848" y="296"/>
-		</transition>
-		<transition>
-			<source ref="id27"/>
-			<target ref="id29"/>
-			<label kind="synchronisation" x="216" y="256">sink?</label>
+			<target ref="id33"/>
+			<label kind="comments">Dont send if part is flooded.</label>
 		</transition>
 		<transition>
 			<source ref="id27"/>
 			<target ref="id26"/>
-			<label kind="guard" x="376" y="192">progress_time &gt; 5</label>
+			<label kind="comments">Dont send if part is flooded.</label>
+		</transition>
+		<transition>
+			<source ref="id28"/>
+			<target ref="id27"/>
+			<label kind="comments">Dont send if part is flooded.</label>
+		</transition>
+		<transition>
+			<source ref="id29"/>
+			<target ref="id28"/>
+			<label kind="select" x="544" y="224">amount : int[1,MAX_SEND_PEOPLE_AMOUNT]</label>
+			<label kind="guard" x="544" y="240">floodedParts[0] == false
+and positionPeopleCount[partIndex] &gt;= amount</label>
+			<label kind="synchronisation" x="544" y="272">incommingPeopleChan[0]!</label>
+			<label kind="assignment" x="544" y="288">positionPeopleCount[partIndex] = positionPeopleCount[partIndex] - amount,
+positionPeopleCount[0] = positionPeopleCount[0] + amount</label>
+			<label kind="comments">Send ppl to another part (can send to self)</label>
+			<nail x="528" y="224"/>
+			<nail x="848" y="224"/>
 		</transition>
 		<transition>
 			<source ref="id30"/>
-			<target ref="id27"/>
+			<target ref="id32"/>
+			<label kind="synchronisation" x="216" y="256">sink?</label>
+		</transition>
+		<transition>
+			<source ref="id30"/>
+			<target ref="id29"/>
+			<label kind="guard" x="376" y="192">progress_time &gt; 5</label>
+		</transition>
+		<transition>
+			<source ref="id33"/>
+			<target ref="id30"/>
 			<label kind="guard" x="32" y="192">progress_time == 0
 and positionPeopleCount[partIndex] &gt; 1</label>
 		</transition>
 		<transition>
-			<source ref="id28"/>
-			<target ref="id30"/>
+			<source ref="id31"/>
+			<target ref="id33"/>
 			<label kind="assignment" x="-96" y="-8">progress_time = 0</label>
 		</transition>
 		<transition>
-			<source ref="id30"/>
-			<target ref="id30"/>
+			<source ref="id33"/>
+			<target ref="id33"/>
 			<label kind="select" x="-376" y="320">savedPeople : int[1,SAVED_AMOUNT]</label>
 			<label kind="guard" x="-376" y="344">progress_time &gt; 10
 &amp;&amp; (savedPeople == SAVED_AMOUNT &amp;&amp; savedPeople &lt;= positionPeopleCount[partIndex]
@@ -485,8 +558,8 @@ progress_time = 0</label>
 			<nail x="-360" y="296"/>
 		</transition>
 		<transition>
-			<source ref="id30"/>
-			<target ref="id29"/>
+			<source ref="id33"/>
+			<target ref="id32"/>
 			<label kind="synchronisation" x="96" y="256">sink?</label>
 		</transition>
 	</template>
@@ -502,40 +575,23 @@ int index_2 = 2;
 
 int index_3 = 3;
 
-//-----  4 HAZARD_PLAYERS - should be best in saving people in low amount of people and low time----------------------------
-//----- TEST DISTRIBUTION 100, 100, 100, 100 TIME : 100
-//position1 = HazardPlayer(index_0, floodedPartsChan[0]);
-//position2 = HazardPlayer(index_1, floodedPartsChan[1]);
-//position3 = HazardPlayer(index_2, floodedPartsChan[2]);
-//position4 = HazardPlayer(index_3, floodedPartsChan[3]);
-
-//----- 4 CAPTAINS - should be best at saving CAPTAIN ----------------------
-//----- TEST DISTRIBUTION 100, 100, 10, 50 TIME : 100
-//position1 = Captain(index_0, floodedPartsChan[0]);
-//position2 = Captain(index_1, floodedPartsChan[1]);
-//position3 = Captain(index_2, floodedPartsChan[2]);
-//position4 = Captain(index_3, floodedPartsChan[3]);
-
-//----- 4 PRIESTS - should be worst at BOTH ----------------------
-//----- TEST DISTRIBUTION 100, 100, 10, 50 TIME : 100
-//position1 = Priest(index_0, floodedPartsChan[0]);
-//position2 = Priest(index_1, floodedPartsChan[1]);
-//position3 = Priest(index_2, floodedPartsChan[2]);
-//position4 = Priest(index_3, floodedPartsChan[3]);
+//----- 4 PRIESTS
+//position1 = Priest(index_0, floodedPartsChan[0], incommingPeopleChan[0], false);
+//position2 = Priest(index_1, floodedPartsChan[1], incommingPeopleChan[1], false);
+//position3 = Priest(index_2, floodedPartsChan[2], incommingPeopleChan[2], false);
+//position4 = Priest(index_3, floodedPartsChan[3], incommingPeopleChan[3], true);
 
 //  3 HAZZARD PLAYERS
-//position1 = HazardPlayer(index_0, floodedPartsChan[0]);
-//position2 = HazardPlayer(index_1, floodedPartsChan[1]);
-//position3 = Captain(index_2, floodedPartsChan[2]);
-// position4 = HazardPlayer(index_3, floodedPartsChan[3]);
-//position3 = Priest(index_2, floodedPartsChan[2]);
-//position4 = Priest(index_3, floodedPartsChan[3]);
+//position1 = HazardPlayer(index_0, floodedPartsChan[0], incommingPeopleChan[0], false);
+//position2 = HazardPlayer(index_1, floodedPartsChan[1], incommingPeopleChan[1], false);
+//position3 = HazardPlayer(index_2, floodedPartsChan[2], incommingPeopleChan[2], false);
+//position4 = Priest(index_3, floodedPartsChan[3], incommingPeopleChan[3], true);
 
 // STANDARD RUN
-position1 = HazardPlayer(index_0, floodedPartsChan[0]);
-position2 = HazardPlayer(index_1, floodedPartsChan[1]);
-position3 = Priest(index_2, floodedPartsChan[2]);
-position4 = Captain(index_3, floodedPartsChan[3]);
+position1 = HazardPlayer(index_0, floodedPartsChan[0], incommingPeopleChan[0], false);
+position2 = HazardPlayer(index_1, floodedPartsChan[1], incommingPeopleChan[1], false);
+position3 = NondeterministicPlayer(index_2, floodedPartsChan[2], incommingPeopleChan[2], false);
+position4 = Priest(index_3, floodedPartsChan[3], incommingPeopleChan[3], true);
 
 ship = Ship();
 

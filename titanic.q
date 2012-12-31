@@ -1,7 +1,7 @@
 //This file was generated from (Academic) UPPAAL 4.1.13 (rev. 5160), November 2012
 
 /*
-
+Satisfied in 987s for 10 people at each point.
 */
 A[] not deadlock
 
@@ -15,9 +15,10 @@ Ship is sunken, leaders are DEAD or CAPTAINS are saved...
 
 MUST be satisfied
 */
-A<> ship.SHIP_SUNKEN and (position1.FLOODED_POSITION_AND_CAPTAIN_SAVED or position1.DEAD) and \
-(position2.FLOODED_POSITION_AND_CAPTAIN_SAVED or position2.DEAD) and (position3.FLOODED_POSITION_AND_CAPTAIN_SAVED or position3.DEAD) \
-and (position4.FLOODED_POSITION_AND_CAPTAIN_SAVED or position4.DEAD)
+A<> ship.SHIP_SUNKEN and (position1.FLOODED_POSITION_AND_CAPTAIN_SAVED or position1.FLOODED_POSITION_AND_PLAYER_SAVED or position1.DEAD) and \
+(position2.FLOODED_POSITION_AND_CAPTAIN_SAVED or position2.FLOODED_POSITION_AND_PLAYER_SAVED or position2.DEAD)\
+and (position3.FLOODED_POSITION_AND_CAPTAIN_SAVED or position3.FLOODED_POSITION_AND_PLAYER_SAVED or position3.DEAD)\
+and (position4.FLOODED_POSITION_AND_CAPTAIN_SAVED or position4.FLOODED_POSITION_AND_PLAYER_SAVED or position4.DEAD)
 
 /*
 20 % of people are saved each time
