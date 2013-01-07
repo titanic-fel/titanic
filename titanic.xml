@@ -11,7 +11,7 @@ const int MAX_SEND_PLACES_COUNT = POSITION_COUNT - 1;
 //derived index of last position
 const int LAST_POSITION = POSITION_COUNT - 1;
 //amount of saved people each turn
-const int SAVED_AMOUNT = 5;
+const int SAVED_AMOUNT = 3;
 //restriction of maximal val on positions
 const int POSITION_PEOPLE_AMOUNT_RESTRICTION = 10000;
 //period restriction
@@ -23,7 +23,7 @@ int peopleCountAtStart = 0;
 
 // the size of channel between 2 places on board 
 //const int SIZE_CHANNEL = 20;
-const int MAX_SEND_PEOPLE_AMOUNT = 5;
+const int MAX_SEND_PEOPLE_AMOUNT = 3;
 
 // type for generating starting conditions - on each of the positions can be between 20 to 30 percent of people (more would shutdown UPPAAL server)
 typedef int [0, POSITION_PEOPLE_AMOUNT_RESTRICTION] position_people_count_array_type [POSITION_COUNT];
@@ -222,10 +222,10 @@ progress_time = 0</label>
 		<transition>
 			<source ref="id12"/>
 			<target ref="id14"/>
-			<label kind="assignment" x="-3536" y="-144">positionPeopleCount[0] = 50,
-positionPeopleCount[1] = 50,
-positionPeopleCount[2] = 50,
-positionPeopleCount[3] = 50, 
+			<label kind="assignment" x="-3536" y="-144">positionPeopleCount[0] = 10,
+positionPeopleCount[1] = 10,
+positionPeopleCount[2] = 10,
+positionPeopleCount[3] = 10, 
 peopleCountOnBoard = positionPeopleCount[0]+positionPeopleCount[1]
 + positionPeopleCount[2]+positionPeopleCount[3],
 peopleCountAtStart = peopleCountOnBoard,

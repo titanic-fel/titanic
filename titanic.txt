@@ -6,29 +6,59 @@ Tento automat popisuje chování lodi. V časových intervalech v rozmezí (PERI
 Stavový automat hráčů
 ---------------------
 
-Obecný popis hráče - detaily ke každému z hráčů jsou v dalších kapitolách. Základní odlišnost v jednotlivých hráčích je v metodě manageSendingPeople, která se stará o přeposílání lidí po částech lodi.
+Obecný popis hráče - detaily ke každému z hráčů jsou v dalších kapitolách. Základní odlišnost v jednotlivých hráčích je v tom, jak posílají lidi ze své pozice na jiné pozice.
 
 Každý z hráčů prochází základní časovou smyčkou
 * v čase 0 se může rozhodnout a odeslat lidi na jinou část lodi, tito lidé dorazí na místo určení v časovém rozmezí (5, 8), pokud se mezitím nepotopí tato část lodi
-* od času 0 se také připravuje další záchranná loď a nastupují na ní lidé. Tato loď odplouvá někdy v časovém rozmezí (10, 20) a pak znovu začíná časová smyčka.
+* od času 0 se také připravuje další záchranná loď a nastupují na ní lidé. Tato loď odplouvá někdy v časovém rozmezí (10, 20) a pak znovu začíná časová smyčka. Pokud na pozici už nejsou jiní lidé než hráč, pak zůstává loď připravena a hráč se v případě potopení části lodi může zachránit. 
 
-Hráč je posledním člověkem na místě. Pokud nezbývá na této části lodi žádný hráč, pak byl zachráněn - v nynější implementaci se může zachránit jen Kapitán.
+Každý z hráčů může být kapitánem lodi (tato možnost se volí proměnnou isCaptain).
 
-Žádný automat neposílá lidi na zaplavenou nebo opuštěnou pozici
+Žádný automat neposílá lidi na zaplavenou nebo opuštěnou pozici.
 
-Stavový automat Captain
+Stavový automat NondeterministicPlayer
 -----------------------
 
-Tento stavový automat hráče je rozšířen o možnost identifikace záchrany kapitána. Pokud je kapitán poslendím na místě, přejde automat do stavu FLOODED_POSITION_AND_CAPTAIN_SAVED. Ostatní automaty sice obsahují také tuto pozici, ale mají ji izolovanou - nelze se do ní dostat. 
-
-Kapitán posílá lidi na jednu nebo obě sousední pozice (kapitánův partIndex +1 a kapitánův partIndex -1). Kapitán se jako jediný rozhoduje o poslání lidí na danou na základě počtu lidí na této pozici - pokud je na pozici, kam chce poslat méně lidí, odešle na ní polovinu z maximálního transportovatelného počtu osob.
+Tento hráč nedeterministicky může poslat 0 až MAX_SEND_PEOPLE_AMOUNT lidí na každou z dalších pozic.
  
 Stavový automat Priest
-----------------------       
-Původně měl být Priest implementován tak, že odesílá třetinu z maximálního transportovatelného počtu osob na všechny zbylé pozice. Nastal problém, co s čísly nedělitelnými 3. Proto Priest posílá třetinu z max, pokud je na jeho pozici dost lidí. Pokud nemá na pozici dost lidí a je na pozici 4, pošle na neopuštěné, nezaplavené pozice 1, 2, 3 menší celou část z třetiny. Pokud nemá dost lidí a Priest není na pozici 4, tak Priest všechny lidi, které neposlal na pozice 1,2 nebo 3 pošle na pozici 4 (spadají sem i případy, kdy Priest nemůže poslat lidi na pozice). 
+----------------------
+
+Tento hráč pouze zachraňuje lidi, které má na své pozici. Žádné lidi nikam neposílá. 
 
 Stavový automat HazardPlayer
 ----------------------------
-Strategie HazardPlayera je prostá - pozice 4 se zaplaví jako poslední, proto HazardPlayer posílá maximální transportovatelný počet osob jen do pozice 4.
+
+Tento hráč má možnost poslat lidi na další následující pozici. Pokud je na jeho pozici více lidí, než MAX_SEND_PEOPLE_AMOUNT, pak může poslat právě MAX_SEND_PEOPLE_AMOUNT lidí, pokud je tam méně lidí, tak pošle všechny.
+
+Testy
+-----
+A[] not deadlock
+Musí být splněn.
+Automaty se nikdy nedostanou do deadlocku. 
+
+A<> ship.SHIP_SUNKEN
+Musí být splněn.
+Každá loď se někdy potopí.
+
+A<> ship.SHIP_SUNKEN and (position1.FLOODED_POSITION_AND_CAPTAIN_SAVED or position1.FLOODED_POSITION_AND_PLAYER_SAVED or position1.DEAD) and (position2.FLOODED_POSITION_AND_CAPTAIN_SAVED or position2.FLOODED_POSITION_AND_PLAYER_SAVED or position2.DEAD) and (position3.FLOODED_POSITION_AND_CAPTAIN_SAVED or position3.FLOODED_POSITION_AND_PLAYER_SAVED or position3.DEAD) and (position4.FLOODED_POSITION_AND_CAPTAIN_SAVED or position4.FLOODED_POSITION_AND_PLAYER_SAVED or position4.DEAD)
+Musí být splněn.
+Každý z hráčů se musí utopit nebo být zachráněn (a to pokud je kapitán i pokud není). 
+
+Dotazy typu A<> ship.SHIP_SUNKEN && peopleCountOnBoard <= (80*peopleCountAtStart)/100
+Můžou i nemusí být splněny.
+Tyto dotazy testují kolik lidí lze vždy zachránit se zvolenou kombinací hráčů. Příklad ukazuje, zda lze vždy zachránit 20% lidí.
+
+Dotazy typu E<> ship.SHIP_SUNKEN && peopleCountOnBoard <= 2 * peopleCountAtStart/100
+Můžou i nemusí být splněny.
+Tyto dotazy testují kolik lidí lze někdy zachránit se zvolenou kombinací hráčů. Tento příklad ukazuje, zda je možné zachránit 98% lidí na lodi.
+ 
+E<> position1.FLOODED_POSITION_AND_CAPTAIN_SAVED or position2.FLOODED_POSITION_AND_CAPTAIN_SAVED or position3.FLOODED_POSITION_AND_CAPTAIN_SAVED or position4.FLOODED_POSITION_AND_CAPTAIN_SAVED
+Může i nemusí být splněn.
+Ukazuje, zda lze v nějakém případě zachránit kapitána. Příklad kdy nelze - na první pozici Priest a velké množství lidí.
+
+A<> position1.FLOODED_POSITION_AND_CAPTAIN_SAVED or position2.FLOODED_POSITION_AND_CAPTAIN_SAVED or position3.FLOODED_POSITION_AND_CAPTAIN_SAVED or position4.FLOODED_POSITION_AND_CAPTAIN_SAVED  
+Může i nemusí být splněn.
+Ukazuje, zda lze v každém případě zachránit kapitána.
 
   
